@@ -1,2 +1,5 @@
 /db.sqlite3
 /Model/
+/data/
+/.idea/
+/DBModel/migrations/

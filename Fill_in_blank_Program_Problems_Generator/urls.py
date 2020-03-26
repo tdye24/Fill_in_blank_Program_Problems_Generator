@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from . import view, db
+from . import view
 
 urlpatterns = [
     url(r'^$', view.index),
