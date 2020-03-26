@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+{% block myTabContentBlock %}
+    <div id="problemContent">
+        <h3 style="color:blue; text-align: center">{{ problem.title }}</h3>
+        <div style="text-align: center;">
+            {% for theme in problem.theme %}
+            <a href="getProblemByTheme?theme={{ theme }}&volume=1" class="btn btn-default btn-sm">
+              <span class="glyphicon glyphicon-tag">{{ theme }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {{ problem.theme }}
+    {{ problem.author }}
+    {{ problem.description }}
+    {{ problem.averageScore }}
+    {{ problem.score }}
+{% endblock %}

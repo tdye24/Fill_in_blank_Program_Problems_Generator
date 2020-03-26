@@ -1,0 +1,41 @@
+{% extends 'index.html' %}
+{% block registerBlock %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+                <h3>Term of Service</h3>
+                <hr />
+           <p>(1)</p>
+           <p>(2)</p>
+        </div>
+        <div class="col-md-offset-1 col-md-5 well">
+            <fieldset>
+                <legend>Create New Account</legend>
+                <div class="form-group">
+                    <label for="inputEmail">E-Mail address</label>
+                    <input type="text" class="form-control" id="inputEmail" placeholder="Enter E-Mail">
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword">Password</label>
+                    <input type="password" class="form-control" id="inputPassword" placeholder="Enter password">
+                </div>
+                <div class="form-group">
+                    <label for="inputPasswordAgain">Password again</label>
+                    <input type="password" class="form-control" id="inputPasswordAgain" placeholder="Enter password again">
+                </div>
+                <div class="form-group">
+                    <label for="inputNickname">Nickname</label>
+                    <input type="text" class="form-control" id="inputNickname" placeholder="Enter nickname">
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="checkboxRead" /><strong>I agree to the terms of service</strong>
+                    </label>
+                </div>
+                <button class="btn btn-info" id="btnRegister" disabled="true">Register!</button>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EFP Online Judge</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>EFP Online Judge</h1>
+                <p class="lead">Element Fill-in-blank Problem Online Judge</p>
+            </div>
+            <div class="pull-right">
+                <p></p>
+                New here? <a target="_blank" id="register" class="btn btn-info" href="register">CREATE AN ACCOUNT</a>
+            </div>
+        </div>
+    </div>
+    {% block registerBlock %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="panel panel-default panel-heading" id="category-wrap">
+                    <ul id="myTab" class="nav nav-pills nav-justified">
+                        <li class="{{ problemTabClass }}"><a href="getProblemList?volume=1">Problem Archive</a></li>
+                        <li class="{{ statusTabClass }}"><a href="getStatusList?volume=1">Realtime Judge Status</a></li>
+                        <li class="{{ rankTabClass }}"><a href="getRanklist?volume=1">Authors Ranklist</a></li>
+                    </ul>
+                    {% block myTabContentBlock %}
+                    <div id="myTabContent" class="tab-content">
+                        <div class="{{ problemContentClass }}">
+                            {% block themeBlock %}
+                            {% endblock %}
+                            <table style="table-layout: fixed;" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Pro.ID</th>
+                                        <th colspan="5">Problem Title</th>
+                                        <th colspan="2">Average Score</th>
+                                        <th colspan="2">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for item in problemList%}
+                                    <tr>
+                                        <th scope="row" colspan="2" title="{{ item.id }}">{{ item.id }}</th>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ item.title }}">
+                                            <a href="getProblemById?id={{ item.id }}">{{ item.title }}</a>
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="2" title="{{ item.averageScore }}">{{ item.averageScore }}</td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="2" title="{{ item.score }}">{{ item.score }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% block problem_pagination %}
+                            <div style="text-align: center;">
+                                <span style="font-size: large; ">Volume</span>
+                                {% for volume in problemVolumes %}
+                                    {% ifequal volume problemVolume %}
+                                    <a href="getProblemList?volume={{ volume }}">
+                                        <span style="font-size: large; color: red">{{volume}}</span>
+                                    </a>
+                                    {% else %}
+                                    <a href="getProblemList?volume={{ volume }}">
+                                        <span style="font-size: large;">{{volume}}</span>
+                                    </a>
+                                    {% endifequal %}
+                                {% endfor %}
+                            </div>
+                            {% endblock %}
+                        </div>
+                        <div class="{{ statusContentClass }}">
+                            <table style="table-layout: fixed;" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th colspan="3">Run ID</th>
+                                        <th colspan="8">Submit Time</th>
+                                        <th colspan="3">Pro.ID</th>
+                                        <th colspan="4">Status</th>
+                                        <th colspan="5">Score</th>
+                                        <th colspan="5">Author</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for status in statusList %}
+                                    <tr>
+                                        <th scope="row" colspan="3" title="{{ status.runId }}">{{ status.runId }}</th>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="8" title="{{ status.submitTime }}">{{ status.submitTime }}</td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ status.proId }}">
+                                            <a href="getProblemById?id={{ status.proId }}">{{ status.proId }}</a>
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="{{ status.judgeStatus }}">{{ status.judgeStatus }}</td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ status.score }}">{{ status.score }}</td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ status.author }}">{{ status.author }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% block status_pagination %}
+                            <div style="text-align: center;">
+                                <span style="font-size: large; ">Volume</span>
+                                {% for volume in statusVolumes %}
+                                    {% ifequal statusVolume volume %}
+                                    <a href="getStatusList?volume={{ volume }}">
+                                        <span style="font-size: large; color: red">{{volume}}</span>
+                                    </a>
+                                    {% else %}
+                                    <a href="getStatusList?volume={{ volume }}">
+                                        <span style="font-size: large;">{{volume}}</span>
+                                    </a>
+                                    {% endifequal %}
+                                {% endfor %}
+                            </div>
+                            {% endblock %}
+                        </div>
+                        <div class="{{ rankContentClass }}">
+                            <table style="table-layout: fixed;" class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="row" colspan="2">Rank</th>
+                                        <th colspan="5">Author</th>
+                                        <th colspan="5">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for author in  ranklist%}
+                                    <tr>
+                                        <th scope="row" colspan="2" title="{{ forloop.counter }}">{{ forloop.counter }}</th>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ author.nickname }}">{{ author.nickname }}</td>
+                                        <td style="overflow: hidden ; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ author.score }}">{{ author.score }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% block ranklist_pagination %}
+                            <div style="text-align: center;">
+                                <span style="font-size: large; ">Volume</span>
+                                {% for volume in ranklistVolumes %}
+                                    {% ifequal ranklistVolume volume %}
+                                    <a href="getStatusList?volume={{ volume }}">
+                                        <span style="font-size: large; color: red">{{volume}}</span>
+                                    </a>
+                                    {% else %}
+                                    <a href="getStatusList?volume={{ volume }}">
+                                        <span style="font-size: large;">{{volume}}</span>
+                                    </a>
+                                    {% endifequal %}
+                                {% endfor %}
+                            </div>
+                            {% endblock %}
+                        </div>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+            <div class="well pull-right col-md-4" id="login-form-wrap">
+                <form method="post">
+                    <div id="username" class="form-group">
+                        <label for="inputUsername">E-Mail</label>
+                        <input class="form-control" type="text" id="inputUsername" name="username" placeholder="Username" />
+                        <span id="helpUsername" class="help-block">E-Mail address which is used to login.</span>
+                    </div>
+                    <div id="password" class="form-group">
+                        <label for="inputPassword">Password</label>
+                        <input class="form-control" type="password" id="inputPassword" placeholder="Password" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="inputRememberMe" />
+                            Remember E-Mail
+                        </label>
+                    </div>
+                    <p>
+                        <input id="signIn" type="submit" class="form-control btn btn-primary" value="Sign in"/>
+                    </p>
+                </form>
+                <p class="text-right">
+                    <a href="#" data-target="#forgetPasswordModal" data-toggle="modal">Forgot password</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+
+{#    <script src="/static/js/index.js"></script>#}
+</body>
+</html>
