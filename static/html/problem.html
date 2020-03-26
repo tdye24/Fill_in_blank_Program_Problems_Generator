@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block myTabContentBlock %}
     <div id="problemContent">
-        <h3 style="color:blue; text-align: center">{{ problem.title }}</h3>
+        <h3 style="color:blue; text-align: center">{{ problem.id }} {{ problem.title }} ({{ problem.score }}')</h3>
         <div style="text-align: center;">
             {% for theme in problem.theme %}
             <a href="getProblemByTheme?theme={{ theme }}&volume=1" class="btn btn-default btn-sm">
@@ -9,11 +9,74 @@
             </a>
             {% endfor %}
         </div>
-    </div>
+        <div style="text-align: right">
+            <span class="glyphicon glyphicon-user"></span>{{ problem.author }}
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Problem Description</h4>
+            </div>
+            <div class="panel-body">
+                {{ problem.description }}
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Element Fill-in-blank Problem</h4>
+            </div>
+            <div class="panel-body" id="editor" style="height: 200px"><textarea>#include<bits/stdc++.h>
+using namespace std;
+int main() {
+    int n, sum;
+    scanf("%d", &n);
+    for(int i=0; i<n; i++) {
+        sum += i;
+    }
+    printf("%d", sum);
+    return 0;
+}
+                </textarea>
 
-    {{ problem.theme }}
-    {{ problem.author }}
-    {{ problem.description }}
-    {{ problem.averageScore }}
-    {{ problem.score }}
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Input Specification</h4>
+            </div>
+            <div class="panel-body">
+                Input Specification
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Output Specification</h4>
+            </div>
+            <div class="panel-body">
+                Output Specification
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Sample Input</h4>
+            </div>
+            <div class="panel-body">
+                Sample Input
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Sample Output</h4>
+            </div>
+            <div class="panel-body">
+                Sample Output
+            </div>
+            <div class="panel-heading">
+                <h4 style="font-family: 'Adobe 黑体 Std R'">Submit Area</h4>
+            </div>
+            <div class="panel-body">
+                Submit Area
+            </div>
+        </div>
+    </div>
 {% endblock %}
+
+
+{% block scriptBlock %}
+    <script src="/static/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    let editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.session.setMode("ace/mode/c_cpp");
+</script>
+{% endblock %}
+

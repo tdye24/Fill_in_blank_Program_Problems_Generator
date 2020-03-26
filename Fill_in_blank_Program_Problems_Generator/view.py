@@ -86,7 +86,7 @@ def get_problem_by_id(request):
 	"""
 	id = eval(request.GET.get('id'))
 	problem = Problem.objects.values(
-		'title', 'theme', 'author', 'description', 'averageScore', 'score').filter(id=id)[0]
+		'id', 'title', 'theme', 'author', 'description', 'averageScore', 'score').filter(id=id)[0]
 	problem['theme'] = problem['theme'].split(',')
 	return render(request, 'problem.html', {'problem': problem,
 	                                        'problemTabClass': 'active',

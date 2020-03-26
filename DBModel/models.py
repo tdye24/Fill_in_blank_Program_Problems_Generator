@@ -18,7 +18,7 @@ class Problem(models.Model):
 	theme = models.CharField(validators=[validate_comma_separated_integer_list], max_length=100, blank=True, default="")
 	description = models.TextField(blank=True, default="")
 	author = models.CharField(max_length=20, blank=True, default="anonymity")
-	score = models.DecimalField(max_digits=10, decimal_places=2, default=20)
+	score = models.IntegerField(default=20)
 	averageScore = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
 	file = models.FileField(upload_to='data', default="")

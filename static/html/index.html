@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EFP Online Judge</title>
+    <title>EFP Online Judge System</title>
     <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/index.css">
+
+
+    {% block cssBlock %}
+
+    {% endblock %}
+
+
 </head>
 <body>
     <div class="container">
@@ -20,6 +27,8 @@
             </div>
         </div>
     </div>
+
+
     {% block registerBlock %}
     <div class="container">
         <div class="row">
@@ -30,11 +39,17 @@
                         <li class="{{ statusTabClass }}"><a href="getStatusList?volume=1">Realtime Judge Status</a></li>
                         <li class="{{ rankTabClass }}"><a href="getRanklist?volume=1">Authors Ranklist</a></li>
                     </ul>
+
+
                     {% block myTabContentBlock %}
                     <div id="myTabContent" class="tab-content">
                         <div class="{{ problemContentClass }}">
+
+
                             {% block themeBlock %}
                             {% endblock %}
+
+
                             <table style="table-layout: fixed;" class="table table-hover">
                                 <thead>
                                     <tr>
@@ -57,6 +72,8 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+
+
                             {% block problem_pagination %}
                             <div style="text-align: center;">
                                 <span style="font-size: large; ">Volume</span>
@@ -73,6 +90,8 @@
                                 {% endfor %}
                             </div>
                             {% endblock %}
+
+
                         </div>
                         <div class="{{ statusContentClass }}">
                             <table style="table-layout: fixed;" class="table table-hover">
@@ -101,6 +120,8 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+
+
                             {% block status_pagination %}
                             <div style="text-align: center;">
                                 <span style="font-size: large; ">Volume</span>
@@ -117,6 +138,8 @@
                                 {% endfor %}
                             </div>
                             {% endblock %}
+
+
                         </div>
                         <div class="{{ rankContentClass }}">
                             <table style="table-layout: fixed;" class="table table-hover">
@@ -137,6 +160,8 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+
+
                             {% block ranklist_pagination %}
                             <div style="text-align: center;">
                                 <span style="font-size: large; ">Volume</span>
@@ -153,9 +178,13 @@
                                 {% endfor %}
                             </div>
                             {% endblock %}
+
+
                         </div>
                     </div>
                     {% endblock %}
+
+
                 </div>
             </div>
             <div class="well pull-right col-md-4" id="login-form-wrap">
@@ -186,10 +215,17 @@
         </div>
     </div>
     {% endblock %}
+
+
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery.cookie.js"></script>
 
-{#    <script src="/static/js/index.js"></script>#}
+
+    {% block scriptBlock %}
+
+    {% endblock %}
+
+
 </body>
 </html>
