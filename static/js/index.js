@@ -1,20 +1,16 @@
 $(document).ready(init);
 
 function init() {
-    loadStatistics();
     checkLogin();
     setupUI();
 }
 
-function checkLogin()
-{
-    $.post("user.php", {
+function checkLogin() {
+    $.post("user", {
         "action" : "checklogin"
-    },
-    function(data)
-    {
-        var islogin = data.islogin;
-        if (islogin) {
+    }, function(data) {
+        let isLogin = data.isLogin;
+        if (isLogin) {
             $("#login-form-wrap").html($("#template-gotodashboard").html());
         }
     });
@@ -31,62 +27,6 @@ function setupUI() {
 		$("#inputRememberMe").prop("checked", true);
     }
     $("#forgetPasswordModal").find("#okButton").click(doForgetPassword);
-}
-
-function loadStatistics() {
-    $.get("problem", {
-        action:'getProblemList',
-        volume: 1
-    },
-    function (res) {
-        // console.log(res)
-        // let data = res['data'];
-        // let html = ``;
-        // for (let i = 0; i < data.length; i++) {
-        //     html += `<tr>
-        //                 <th id="problem-number" scope="row" colspan="2" title="${data[i].id}">${data[i].id}</th>
-        //                 <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="problem-title" colspan="5" title="${data[i].title}">${data[i].title}</td>
-        //                 <td style="overflow: hidden ; text-overflow: ellipsis; white-space: nowrap;" id="average-score" colspan="2" title="${data[i].averageScore}">${data[i].averageScore}</td>
-        //                 <td style="overflow: hidden ; text-overflow: ellipsis; white-space: nowrap;" id="average-score" colspan="2" title="${data[i].score}">${data[i].score}</td>
-        //              </tr>`
-        // }
-        // $('#problem-archive-content tbody').html(html)
-
-        // let volume = res['volume'];
-        // let volumes = res['volumes'];
-        // let paginationHtml = pagination(volume, volumes);
-        // $('#pagination').append(paginationHtml);
-    });
-    $("a[href='#problem-archive-content']").click(function() {
-        alert("Request Problem Data!");
-    });
-    $("a[href='#realtime-judge-status']").click(function () {
-        alert("Request Judge Status");
-    });
-    $("a[href='#authors-ranklist']").click(function () {
-        alert("Request Ranklist");
-    });
-}
-
-function pagination(volume, volumes) {
-    let html = ``;
-    for(let i=1; i<=volumes; i++) {
-        if(i == volume) {
-            html += `<a href="getProblemList?volume=${i}">
-                        <span style="font-size: large; color: red">
-                            ${i}
-                        </span>
-                      </a>`;
-        } else {
-            html += `<a href="problem?action=getProblemList&volume=${i}">
-                        <span style="font-size: large">
-                            ${i}
-                        </span>
-                      </a>`;
-        }
-
-    }
-    return html;
 }
 
 function usernameFocusIn() {
@@ -132,14 +72,14 @@ function login() {
             } else {
                 $.cookie("username", null);
             }
+        } else if (json_data["error"] == 1) {
+            $("#username").addClass("error");
+            $("#helpUsername").removeClass("hide");
+            $("#helpUsername").text(json_data["errorMessage"]);
         } else if (json_data["error"] == 2) {
             $("#password").addClass("error");
             $("#helpPassword").removeClass("hide");
             $("#helpPassword").text(json_data["errorMessage"]);
-        } else if (json_data["error"] == 3) {
-            $("#username").addClass("error");
-            $("#helpUsername").removeClass("hide");
-            $("#helpUsername").text(json_data["errorMessage"]);
         } else {
             alert(json_data["errorMessage"]);
         }

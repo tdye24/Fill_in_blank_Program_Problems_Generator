@@ -1,11 +1,11 @@
 function init() {
 	$("#checkboxRead").click(function() {
 	    if ($("#checkboxRead").prop('checked'))
-	        $("#btnRegister").attr('disabled', false);
+	        $("#signup").removeAttr('disabled')
 	    else
-	        $("#btnRegister").attr('disabled', true);
+	        $("#signup ").attr('disabled', 'disabled')
     });
-	$("#btnRegister").click(submit);
+	$("#signup").click(submit);
 }
 
 function submit() {
@@ -31,22 +31,11 @@ function submit() {
 	}
 	if (pass1 !== pass2) {
 		alert("The two passes of passwords are different.");
+		$("#inputPassword").val('');
+		$("#inputPasswordAgain").val('');
 		return false;
 	}
-	$.post("register", {
-		"email" : email,
-		"password": pass1,
-		"nickname": nickname,
-	},
-	function(data) {
-		if(data['error'] === 0) {
-			alert("A mail has been sent to your E-Mail address. Please read this mail to finish the registration.");
-			top.location="index";
-		} else {
-			alert(data['errorMessage'])
-		}
-	});
-	return false;
+	return true;
 }
 
 $(document).ready(init);

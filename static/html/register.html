@@ -1,41 +1,62 @@
-{% extends 'index.html' %}
-{% block registerBlock %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-                <h3>Term of Service</h3>
-                <hr />
-           <p>(1)</p>
-           <p>(2)</p>
-        </div>
-        <div class="col-md-offset-1 col-md-5 well">
-            <fieldset>
-                <legend>Create New Account</legend>
-                <div class="form-group">
-                    <label for="inputEmail">E-Mail address</label>
-                    <input type="text" class="form-control" id="inputEmail" placeholder="Enter E-Mail">
-                </div>
-                <div class="form-group">
-                    <label for="inputPassword">Password</label>
-                    <input type="password" class="form-control" id="inputPassword" placeholder="Enter password">
-                </div>
-                <div class="form-group">
-                    <label for="inputPasswordAgain">Password again</label>
-                    <input type="password" class="form-control" id="inputPasswordAgain" placeholder="Enter password again">
-                </div>
-                <div class="form-group">
-                    <label for="inputNickname">Nickname</label>
-                    <input type="text" class="form-control" id="inputNickname" placeholder="Enter nickname">
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox" id="checkboxRead" /><strong>I agree to the terms of service</strong>
-                    </label>
-                </div>
-                <button class="btn btn-info" id="btnRegister" disabled="true">Register!</button>
-            </fieldset>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EFP Online Judge System</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>EFP Online Judge</h1>
+                <p class="lead">Element Fill-in-blank Problem Online Judge</p>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
-
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                    <h3>Term of Service</h3>
+                    <hr />
+               <p>(1)</p>
+               <p>(2)</p>
+            </div>
+            <div class="col-md-offset-1 col-md-5 well">
+                <form method="post" action="user?action=signup&next={{ next }}">
+                    <legend>Create New Account</legend>
+                    <div class="form-group">
+                        <label for="inputEmail">E-Mail address</label>
+                        <input name="email" type="email" class="form-control" id="inputEmail" placeholder="Enter E-Mail">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Password</label>
+                        <input name="password" type="password" class="form-control" id="inputPassword" placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPasswordAgain">Password again</label>
+                        <input type="password" class="form-control" id="inputPasswordAgain" placeholder="Enter password again">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputNickname">Nickname</label>
+                        <input name="nickname" type="text" class="form-control" id="inputNickname" placeholder="Enter nickname">
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" id="checkboxRead" /><strong>I agree to the terms of service</strong>
+                        </label>
+                    </div>
+                    <p>
+                        <input id="signup" type="submit" class="form-control btn btn-info" value="signup" disabled/>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/static/js/register.js"></script>
+</html>

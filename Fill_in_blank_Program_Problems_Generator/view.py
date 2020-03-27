@@ -4,7 +4,7 @@
 # @name:view
 # @author:TDYe
 from django.core import serializers
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from DBModel.models import User, Problem, Submission
 from django.contrib.auth.hashers import make_password, check_password
@@ -27,29 +27,60 @@ def index(request):
 								'rankTabClass': '',
 								'problemContentClass': '',
 								'statusContentClass': 'hidden',
-								'rankContentClass': 'hidden'})
+								'rankContentClass': 'hidden', })
+
+
+def user(request):
+	"""
+	user signup, signin, checkLogin/
+	:param request:
+	:return:
+	"""
+	if request.method == 'POST':
+		if request.GET.get('action') == 'signin':
+			email = request.POST.get('email')
+			password = request.POST.get('password')
+			exist = User.objects.filter(email=email).exists()
+			next = request.GET.get('next')
+			if exist:
+				user = User.objects.all().filter(email=email)[0]
+				if check_password(password, user.password):
+					request.session['checkSignin'] = True
+					request.session['email'] = user.email
+					request.session['nickname'] = user.nickname
+					request.session['score'] = str(user.score)
+					return redirect(next)
+				else:
+					# The password is wrong.
+					return redirect(next)
+			else:
+				# The account does not exist.
+				return render(next)
+		elif request.GET.get('action') == 'signup':
+			email, password, nickname \
+				= request.POST.get('email'), request.POST.get('password'), request.POST.get('nickname')
+			try:
+				user = User(email=email,
+				            password=make_password(password=password, salt=None),
+				            nickname=nickname)
+				user.save()
+				next = request.GET.get('next')
+				return redirect(next)
+			except ValueError:
+				print("Invalid parameters => (email, password, nickname)")
+			else:
+				return render(request, 'register.html')
 
 
 def register(request):
 	"""
-	implement the registration
-	:param request: contains {username: "", password: "", nickname: ""}
-	:return: HttpResponse
+	just render the register.html, the register process wid handled by view.user?action=signup&next=...
+	:param
+	:return:
 	"""
 	if request.method == 'GET':
-		return render(request, 'register.html')
-	if request.method == 'POST':
-		email, password, nickname\
-			= request.POST.get('email'), request.POST.get('password'), request.POST.get('nickname')
-		user = User(email=email,
-		            password=make_password(password=password, salt=None),
-		            nickname=nickname)
-		user.save()
-		res = {
-			'error': 0,
-			'errorMessage': "Successfully Registered!"
-		}
-		return HttpResponse(json.dumps(res), content_type='application/json')
+		# next：the url for redirecting after registration
+		return render(request, 'register.html', {'next': request.GET.get('next')})
 
 
 def get_problem_list(request):
@@ -86,8 +117,10 @@ def get_problem_by_id(request):
 	"""
 	id = eval(request.GET.get('id'))
 	problem = Problem.objects.values(
-		'id', 'title', 'theme', 'author', 'description', 'averageScore', 'score').filter(id=id)[0]
+		'id', 'title', 'theme', 'author', 'description', 'answer', 'averageScore', 'score').filter(id=id)[0]
 	problem['theme'] = problem['theme'].split(',')
+	problem['blanksNums'] = [(i+1) for i in range(len(problem['answer'].split(',')))]
+	del(problem['answer'])
 	return render(request, 'problem.html', {'problem': problem,
 	                                        'problemTabClass': 'active',
 	                                        'statusTabClass': '',

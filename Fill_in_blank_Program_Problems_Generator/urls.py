@@ -26,6 +26,7 @@ urlpatterns = [
 	url(r'^getStatusList$', view.get_status_list),
 	url(r'^getRanklist$', view.get_ranklist),
     url(r'^register$', view.register),
+	url(r'^user$', view.user),
 
 ]
 

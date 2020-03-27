@@ -6,13 +6,6 @@
     <title>EFP Online Judge System</title>
     <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/index.css">
-
-
-    {% block cssBlock %}
-
-    {% endblock %}
-
-
 </head>
 <body>
     <div class="container">
@@ -23,7 +16,7 @@
             </div>
             <div class="pull-right">
                 <p></p>
-                New here? <a target="_blank" id="register" class="btn btn-info" href="register">CREATE AN ACCOUNT</a>
+                New here? <a target="_blank" id="register" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
             </div>
         </div>
     </div>
@@ -167,11 +160,11 @@
                                 <span style="font-size: large; ">Volume</span>
                                 {% for volume in ranklistVolumes %}
                                     {% ifequal ranklistVolume volume %}
-                                    <a href="getStatusList?volume={{ volume }}">
+                                    <a href="getRanklist?volume={{ volume }}">
                                         <span style="font-size: large; color: red">{{volume}}</span>
                                     </a>
                                     {% else %}
-                                    <a href="getStatusList?volume={{ volume }}">
+                                    <a href="getRanklist?volume={{ volume }}">
                                         <span style="font-size: large;">{{volume}}</span>
                                     </a>
                                     {% endifequal %}
@@ -188,15 +181,21 @@
                 </div>
             </div>
             <div class="well pull-right col-md-4" id="login-form-wrap">
-                <form method="post">
-                    <div id="username" class="form-group">
-                        <label for="inputUsername">E-Mail</label>
-                        <input class="form-control" type="text" id="inputUsername" name="username" placeholder="Username" />
-                        <span id="helpUsername" class="help-block">E-Mail address which is used to login.</span>
+                {% if request.session.checkSignin %}
+                <form method="post" class="hidden" action="user?action=signin&next={{ request.get_full_path }}">
+                {% endif %}
+                {% if not request.session.checkSignin %}
+                <form method="post" action="user?action=signin&next={{ request.get_full_path }}">
+                {% endif %}
+
+                    <div id="email" class="form-group">
+                        <label for="inputEmail">E-Mail</label>
+                        <input class="form-control" type="email" id="inputEmail" name="email" placeholder="Email" />
+                        <span id="helpEmail" class="help-block">E-Mail address which is used to login.</span>
                     </div>
                     <div id="password" class="form-group">
                         <label for="inputPassword">Password</label>
-                        <input class="form-control" type="password" id="inputPassword" placeholder="Password" />
+                        <input class="form-control" type="password" id="inputPassword" name="password" placeholder="Password" />
                     </div>
                     <div class="form-group">
                         <label>
@@ -205,7 +204,7 @@
                         </label>
                     </div>
                     <p>
-                        <input id="signIn" type="submit" class="form-control btn btn-primary" value="Sign in"/>
+                        <input id="signin" type="submit" class="form-control btn btn-primary" value="signin"/>
                     </p>
                 </form>
                 <p class="text-right">

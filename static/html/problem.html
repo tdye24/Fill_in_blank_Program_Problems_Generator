@@ -64,7 +64,22 @@ int main() {
                 <h4 style="font-family: 'Adobe 黑体 Std R'">Submit Area</h4>
             </div>
             <div class="panel-body">
-                Submit Area
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+
+                        {% for blanksNum in problem.blanksNums %}
+                            <label style="margin-top: 5px" for="blank{{ blanksNum }}" class="col-sm-1 control-label">#{{ blanksNum }}</label>
+                            <div class="col-sm-3" style="margin-top: 5px">
+                                <input type="text" class="form-control" id="blank{{ blanksNum }}" placeholder="fill in the no.{{ blanksNum }} blank">
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+
+                </form>
             </div>
         </div>
     </div>
