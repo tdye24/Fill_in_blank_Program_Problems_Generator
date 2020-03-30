@@ -308,7 +308,7 @@ def program2vector(path):
 		elif state == 1:
 			if item in setA | setB | {'_', '.'}:    # a_, a., a5=====>a.  struct is regarded as a variable
 				symbol += item
-				if next_item in setC | rightD | {' ', '\n'}:  # a_*, a_)
+				if next_item in setC | rightD:  # a_*, a_)
 					state = 0
 					if is_keyword(symbol):
 						print(symbol, ' keyword')
