@@ -1,6 +1,6 @@
 /db.sqlite3
-/Model/
 /data/
 /.idea/
 /DBModel/migrations/
 /static/ace-builds/
+/Model/dataset/
