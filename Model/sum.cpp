@@ -4,7 +4,7 @@ int hello(int a) {
 
 int main() {
 	int
-	_c =    +(5+4);
+	_c =    +5  +-4;
 	printf("%d", _c);
 	return 0;
 }

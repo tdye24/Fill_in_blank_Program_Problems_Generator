@@ -218,7 +218,7 @@ def program2vector(path):
 					state = 0
 					print(symbol, ' +')     # add +
 				elif pre in setC:   # positive +
-					if next_item not in {' ', '\n'}:
+					if next_item not in setB | {' ', '\n', '.'}:
 						state = 0
 						print(symbol, ' +')
 					else:
@@ -231,7 +231,7 @@ def program2vector(path):
 					state = 0
 					print(symbol, ' -')     # sub
 				elif pre in setC:
-					if next_item not in {' ', '\n'}:
+					if next_item not in setB | {' ', '\n', '.'}:
 						state = 0
 						print(symbol, ' -')
 					else:
