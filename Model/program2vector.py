@@ -109,7 +109,7 @@ setA = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
 
 setB = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
 
-setC = {'+', '-', '*', '/', '=', '&', '|', '^', '%', '!', '>', '<', '?', ':', ',', ';'}
+setC = {'+', '-', '*', '/', '=', '&', '|', '^', '%', '!', '>', '<', '?', ':', ',', ';', '.'}
 
 setD = {'(', ')', '[', ']', '{', '}'}
 
@@ -305,8 +305,11 @@ def program2vector(path):
 				state = 0
 				symbol += item
 				print(symbol, ' delimiter')
+			elif item == '.':
+				state = 0
+				print(symbol, ' .')
 		elif state == 1:
-			if item in setA | setB | {'_', '.'}:    # a_, a., a5=====>a.  struct is regarded as a variable
+			if item in setA | setB | {'_'}:    # a_, a5=====>a.  struct is regarded as a variable
 				symbol += item
 				if next_item in setC | rightD:  # a_*, a_)
 					state = 0
@@ -321,7 +324,7 @@ def program2vector(path):
 					else:
 						print(symbol, ' function')
 			elif item in {' ', '\n'}:
-				if next_item in setA | setB | setC | {'_'} | rightD:   # a ), a\n), a *, int a, int _a
+				if next_item in setA | {'_'} | setB | setC | rightD:   # a ), a\n), a *, int a, int _a, return 8
 					state = 0
 					if is_keyword(symbol):
 						print(symbol, ' keyword')
@@ -334,7 +337,7 @@ def program2vector(path):
 					state = 2
 		elif state == 2:
 			if item in {' ', '\n'}:
-				if next_item in setA | setB | setC | {'_'} | rightD:  # a  ), a\n ), a  *, int  a, int  _a, return 8, return 0
+				if next_item in setA | {'_'} | setB | setC | rightD:  # a  ), a\n ), a  *, int  a, int  _a, return 8
 					state = 0
 					if is_keyword(symbol):
 						print(symbol, ' keyword')
