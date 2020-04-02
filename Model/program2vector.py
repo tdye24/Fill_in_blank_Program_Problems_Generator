@@ -196,7 +196,7 @@ def program2vector(path):
 				if next_item in setC | rightD:  # a*, a)
 					state = 0
 					print(symbol, ' variable')
-				elif next_item in {'('}:    # printf(, pay(
+				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
 						print(symbol, ' keyword')
@@ -308,6 +308,13 @@ def program2vector(path):
 			elif item == '.':
 				state = 0
 				print(symbol, ' .')
+			elif item == '|':
+				symbol += item
+				if next_item not in {'|'}:
+					state = 0
+					print(symbol, ' |')
+				else:
+					state = 24
 		elif state == 1:
 			if item in setA | setB | {'_'}:    # a_, a5=====>a.  struct is regarded as a variable
 				symbol += item
@@ -317,10 +324,10 @@ def program2vector(path):
 						print(symbol, ' keyword')
 					else:
 						print(symbol, ' variable')
-				elif next_item in {'('}:    # a5(,
+				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')   # seemly not exist
+						print(symbol, ' keyword')
 					else:
 						print(symbol, ' function')
 			elif item in {' ', '\n'}:
@@ -330,9 +337,15 @@ def program2vector(path):
 						print(symbol, ' keyword')
 					else:
 						print(symbol, ' variable')
-				elif next_item in {'('}:
+				elif next_item in {'(', '{'}:   # else {,  hello(, main(
 					state = 0
-					print(symbol, ' function')
+					if is_keyword(symbol):
+						print(symbol, ' keyword')
+					else:
+						print(symbol, ' function')
+				elif next_item in {'['}:
+					state = 0
+					print(symbol, ' variable')
 				else:
 					state = 2
 		elif state == 2:
@@ -343,9 +356,12 @@ def program2vector(path):
 						print(symbol, ' keyword')
 					else:
 						print(symbol, ' variable')
-				elif next_item in {'('}:
+				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
-					print(symbol, ' function')
+					if is_keyword(symbol):
+						print(symbol, ' keyword')
+					else:
+						print(symbol, ' function')
 				else:
 					state = 2
 		elif state == 3:
@@ -494,6 +510,11 @@ def program2vector(path):
 				print(symbol, ' numeric constant')
 			else:
 				state = 23
+		elif state == 24:
+			symbol += item
+			if item == '|':
+				state = 0
+				print(symbol, ' ||')
 		if state == 0 and len(symbol) > 0:
 			pre = symbol
 			symbol = ''
