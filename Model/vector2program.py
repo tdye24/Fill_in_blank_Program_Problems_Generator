@@ -3,8 +3,14 @@
 # @date:2020/4/1 12:20
 # @name:vector2program
 # @author:TDYe
+import json
 import re
-LOOP_SIZE = 100
+
+
+def load_vocabulary(path):
+	with open(path) as f:
+		data = json.load(f)
+	return data
 
 
 def tabs(level):
@@ -59,7 +65,7 @@ def clean_c_style(code: str):
 			in_for -= 1
 			out += ch
 		elif code[i: i+4] == 'else':
-			out = re.sub(r'\s*$', '') + ' e'
+			out = re.sub(r'\s*$', '', out) + ' e'
 		elif bool(re.match(r'^for\s*\(', code[i:])):
 			in_for = 1
 			out += 'for ('
@@ -72,7 +78,7 @@ def clean_c_style(code: str):
 			i += 1
 		elif code[i: i+2] == '/*':
 			in_comment = '/*'
-			out += '\n' + tabs(level) + '/*';
+			out += '\n' + tabs(level) + '/*'
 			i += 1
 		elif ch == '"' or ch == "'":
 			if in_string and in_string == ch:
@@ -116,19 +122,32 @@ def clean_c_style(code: str):
 	return out
 
 
-def vector2program(vector):
+def vector2program(vector: [[]]):
 	program = ''
+	problem = ''
 	for item in vector:
-		program = program + item[0] + " "
-		if item[0] in {'{', '}'}:
-			program += '\n    '
-		elif item[0] == ';':
-			program += '\n'
-	return program
+		program += item[0] + " "
+	i = 0
+	while i < len(vector):
+		if vector[i][3] == 'B':
+			problem += '__' + ' '
+		elif vector[i][3] == 'I' and i-1 > 0 and vector[i-1][3] in {'B', 'I'}:
+			problem += '__' + ' '
+		else:
+			problem += vector[i][0] + ' '
+		i += 1
+	program = clean_c_style(program)
+	problem = clean_c_style(problem)
+	return program, problem
 
 
 if __name__ == '__main__':
-	code_ = """int main() {/*初始化变量sum*/int sum = 0; for(int i=0; i<10; i++) {sum += i;}printf("%d", sum);//输出sum
-	 return 0;}
-	"""
-	print(clean_c_style(code_))
+	index = 0
+	vectors = load_vocabulary('./dataset/testing.json')
+	for vector_ in vectors:
+		program_, problem_ = vector2program(vector_)
+		with open('./source/testing/program/program_' + str(index), mode='w') as f:
+			f.write(program_)
+		with open('./source/testing/problem/problem_' + str(index), mode='w') as f:
+			f.write(problem_)
+		index += 1
