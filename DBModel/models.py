@@ -25,9 +25,10 @@ class Problem(models.Model):
 
 
 class Submission(models.Model):
-	runId = models.AutoField(primary_key=True, default=10001)
+	submissionId = models.AutoField(primary_key=True, default=10001)
 	submitTime = models.DateTimeField(default=timezone.now)
 	judgeStatus = models.BooleanField(default='0')
 	proId = models.IntegerField(default=1000)
+	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
 	author = models.CharField(max_length=20, default='')
 	score = models.DecimalField(max_digits=10, decimal_places=2, default=0)
