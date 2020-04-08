@@ -10,7 +10,7 @@ import MySQLdb
 import queue
 from time import sleep
 
-queue = queue.Queue()
+queue_ = queue.Queue()
 mutex = threading.Lock()
 
 try:
@@ -28,42 +28,43 @@ except Exception as e:
 
 
 def get_submission():
-	global queue, mutex, db
+	global queue_, db
 	cursor = db.cursor()
 	while True:
 		sleep(1)
-		if mutex.acquire():
+		try:    # TODO(tdye): maybe needs a mutex lock
 			cursor.execute(
-				"SELECT * from dbmodel_submission where judgeStatus = -1")
+				"SELECT submissionId, proId, answer from dbmodel_submission where judgeStatus = -1")
 			data = cursor.fetchall()
-			try:
-				for item in data:
-					queue.put(item[0])
-					# -2 -> waiting
-					cursor.execute("UPDATE dbmodel_submission SET judgeStatus = -2 WHERE runId = %d" % item[0])
-				db.commit()
-			except:
-				db.rollback()
-			mutex.release()
+			for item in data:
+				blank_nums = len(item[2].split(','))
+				for th in range(blank_nums):
+					queue_.put('%s-%s-%s' % (str(item[0]), str(item[1]), str(th+1)))
+				# -2 -> waiting
+				cursor.execute("UPDATE dbmodel_submission SET judgeStatus = -2 WHERE submissionId = %d" % item[0])
+			db.commit()
+		except Exception as _e:
+			print(_e)
+			db.rollback()
 	db.close()
 
 
 def deal_client(newSocket: socket, addr):
-	global mutex, queue
+	global queue_
 	status = False
 	while True:
-		sleep(2)
+		sleep(1)
 		try:
-			if status and not queue.empty():
-				mutex.acquire()
-				runId = queue.get()
-				mutex.release()
-				print(runId)
-				newSocket.send(("judge|%d" % runId).encode())
+			if status and not queue_.empty():
+				submissionId_proId_th = queue_.get()
+				print(submissionId_proId_th)
+				newSocket.send(("judge|%s" % submissionId_proId_th).encode())
 				data = newSocket.recv(1024)
 				recv_data = data.decode()
-				print(recv_data)
-				status = False
+				if recv_data == 'gotten':
+					status = False
+				else:
+					queue_.put(submissionId_proId_th)
 			else:
 				newSocket.send('get_status'.encode())
 				data = newSocket.recv(1024)
@@ -73,9 +74,9 @@ def deal_client(newSocket: socket, addr):
 				print(addr, status)
 		except socket.error:
 			newSocket.close()
-		except:
+		except Exception as e_:
 			newSocket.close()
-			print('error!')
+			print(e_)
 
 
 HOST = '0.0.0.0'
