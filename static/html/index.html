@@ -14,10 +14,23 @@
                 <h1>EFP Online Judge</h1>
                 <p class="lead">Element Fill-in-blank Problem Online Judge</p>
             </div>
-            <div class="pull-right">
-                <p></p>
-                New here? <a target="_blank" id="register" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
-            </div>
+
+
+            {% block registerLinkBlock %}
+                {% if request.session.checkSignin %}
+                    <div class="pull-right">
+                        <a target="_blank" id="register" class="btn btn-warning" href="user?action=logout&&next={{ request.get_full_path }}">LOGOUT</a>
+                    </div>
+                {% endif %}
+                {% if not request.session.checkSignin %}
+                    <div class="pull-right">
+                        <p></p>
+                        New here? <a target="_blank" id="register" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
+                    </div>
+                {% endif %}
+            {% endblock %}
+
+
         </div>
     </div>
 
@@ -25,6 +38,9 @@
     {% block registerBlock %}
     <div class="container">
         <div class="row">
+
+
+            {% block indexPanleBlock %}
             <div class="col-md-8">
                 <div class="panel panel-default panel-heading" id="category-wrap">
                     <ul id="myTab" class="nav nav-pills nav-justified">
@@ -101,7 +117,7 @@
                                 <tbody>
                                 {% for status in statusList %}
                                     <tr>
-                                        <th scope="row" colspan="3" title="{{ status.runId }}">{{ status.runId }}</th>
+                                        <th scope="row" colspan="3" title="{{ status.submissionId }}">{{ status.submissionId }}</th>
                                         <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="8" title="{{ status.submitTime }}">{{ status.submitTime }}</td>
                                         <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ status.proId }}">
                                             <a href="getProblemById?id={{ status.proId }}">{{ status.proId }}</a>
@@ -180,14 +196,16 @@
 
                 </div>
             </div>
-            <div class="well pull-right col-md-4" id="login-form-wrap">
-                {% if request.session.checkSignin %}
-                <form method="post" class="hidden" action="user?action=signin&next={{ request.get_full_path }}">
-                {% endif %}
-                {% if not request.session.checkSignin %}
-                <form method="post" action="user?action=signin&next={{ request.get_full_path }}">
-                {% endif %}
+            {% endblock %}
 
+
+            {% if request.session.checkSignin %}
+            <div class="well pull-right col-md-4 hidden" id="login-form-wrap">
+            {% endif %}
+            {% if not request.session.checkSignin %}
+            <div class="well pull-right col-md-4" id="login-form-wrap">
+            {% endif %}
+                <form method="post" action="user?action=signin&next={{ request.get_full_path }}">
                     <div id="email" class="form-group">
                         <label for="inputEmail">E-Mail</label>
                         <input class="form-control" type="email" id="inputEmail" name="email" placeholder="Email" />
