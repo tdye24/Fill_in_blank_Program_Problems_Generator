@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EFP Online Judge System</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1 style="text-align: center">EFP Online Judge</h1>
+                <p class="lead" style="text-align: center">Element Fill-in-blank Problem Online Judge</p>
+                <form role="form">
+                    <div class="form-group">
+                        <label for="title" style="font-family: 'Adobe 黑体 Std R'">Problem Title</label>
+                        <input type="text" class="form-control" name="title" placeholder="Please input problem title.">
+                    </div>
+                    <div class="form-group">
+                        <label for="theme" style="font-family: 'Adobe 黑体 Std R'">Themes</label>
+                        <input type="text" class="form-control" name="theme" placeholder="Maximum 5 Labels.">
+                        <p class="help-block">Refer to id-theme table and separate them using commas.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Problem Description</label>
+                        <textarea class="form-control" rows="3" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="problem-file">Problem File</label>
+                        <input type="file" name="problem-file" accept=".c, .cpp">
+                        <p class="help-block">File for generating element fill-in-blank problem.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="test-cases">Test Cases</label>
+                        <input type="file" name="test-cases" accept=".rar">
+                        <p class="help-block">Compress test cases using rar.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty</label><br>
+                        <input type="number" name="difficulty">
+                        <p class="help-block">Maximum difficulty is 100.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
