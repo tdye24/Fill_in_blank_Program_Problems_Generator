@@ -19,13 +19,14 @@
             {% block registerLinkBlock %}
                 {% if request.session.checkSignin %}
                     <div class="pull-right">
-                        <a target="_blank" id="register" class="btn btn-warning" href="user?action=logout&&next={{ request.get_full_path }}">LOGOUT</a>
+                        <p></p>
+                        <a target="_parent" class="btn btn-warning" href="user?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-user"></span>LOGOUT</a>
                     </div>
                 {% endif %}
                 {% if not request.session.checkSignin %}
                     <div class="pull-right">
                         <p></p>
-                        New here? <a target="_blank" id="register" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
+                        New here? <a target="_parent" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
                     </div>
                 {% endif %}
             {% endblock %}
@@ -209,7 +210,6 @@
                     <div id="email" class="form-group">
                         <label for="inputEmail">E-Mail</label>
                         <input class="form-control" type="email" id="inputEmail" name="email" placeholder="Email" />
-                        <span id="helpEmail" class="help-block">E-Mail address which is used to login.</span>
                     </div>
                     <div id="password" class="form-group">
                         <label for="inputPassword">Password</label>
