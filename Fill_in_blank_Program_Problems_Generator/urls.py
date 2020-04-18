@@ -27,7 +27,8 @@ urlpatterns = [
 	url(r'^getRanklist$', view.get_ranklist),
     url(r'^register$', view.register),
 	url(r'^user$', view.user),
-
+	url(r'^teacherIndex$', view.teacher_index),
+	url(r'^teacher$', view.teacher),
 ]
 
 
