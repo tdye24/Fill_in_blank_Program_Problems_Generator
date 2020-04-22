@@ -5,6 +5,8 @@
 # @author:TDYe
 import json
 import re
+import random
+from logfile import logger
 
 
 def load_vocabulary(path):
@@ -122,30 +124,54 @@ def clean_c_style(code: str):
 	return out
 
 
-def vector2program(vector: [[]]):
+def transform(vector: [], id: int):
+	program, problem, answer_lst, blank_num = assemble(vector)
+	if blank_num == 0:
+		logger.info('Model generates ZERO blank for problem %d!' % id)
+		# for i in range(len(vector)):
+		# 	probability = random.random()
+		# 	if probability > 0.9:
+		# 		vector[i][3] = 'B'
+		for _ in range(len(vector)//10):
+			randId = random.randint(int(len(vector)*1/4), int(len(vector)*3/4))
+			vector[randId][3] = 'B'
+		program, problem, answer_lst, blank_num = assemble(vector)
+		logger.info('System generates %d blanks randomly for problem %d.' % (blank_num, id))
+	else:
+		logger.info('Model generates %d blanks for problem %d.' % (blank_num, id))
+	program = clean_c_style(program)
+	problem = clean_c_style(problem)
+	return program, problem, answer_lst
+
+
+def assemble(vector: []):
+	blank_num = 0
 	program = ''
 	problem = ''
+	answer_lst = []
 	for item in vector:
 		program += item[0] + " "
 	i = 0
 	while i < len(vector):
 		if vector[i][3] == 'B':
 			problem += '__' + ' '
-		elif vector[i][3] == 'I' and i-1 > 0 and vector[i-1][3] in {'B', 'I'}:
+			answer_lst.append(vector[i][0])
+			blank_num += 1
+		elif vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}:
 			problem += '__' + ' '
+			answer_lst.append(vector[i][0])
+			blank_num += 1
 		else:
 			problem += vector[i][0] + ' '
 		i += 1
-	program = clean_c_style(program)
-	problem = clean_c_style(problem)
-	return program, problem
+	return program, problem, answer_lst, blank_num
 
 
 if __name__ == '__main__':
 	index = 0
 	vectors = load_vocabulary('./dataset/testing.json')
 	for vector_ in vectors:
-		program_, problem_ = vector2program(vector_)
+		program_, problem_ = transform(vector_)
 		with open('./source/testing/program/program_' + str(index), mode='w') as f:
 			f.write(program_)
 		with open('./source/testing/problem/problem_' + str(index), mode='w') as f:
