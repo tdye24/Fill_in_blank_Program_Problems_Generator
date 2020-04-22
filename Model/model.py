@@ -15,6 +15,8 @@ from keras_contrib.layers import CRF
 from keras_contrib.losses import crf_loss
 from keras_contrib.metrics import crf_accuracy
 
+BASEDIR = 'D:/MyProjects/Fill_in_blank_Program_Problems_Generator/Model/'
+
 
 def load_data(path):
     """
@@ -103,7 +105,7 @@ def run():
 
     # Train Model
     history = model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
-                        callbacks=[modelCheckpoint], epochs=10, batch_size=8)
+                        callbacks=[modelCheckpoint], epochs=100, batch_size=8)
 
     # Plot Training History
     plot_history({'Training': history.history['crf_accuracy'], 'Validation': history.history['val_crf_accuracy']},
@@ -111,20 +113,20 @@ def run():
     plot_history({'Training': history.history['loss'], 'Validation': history.history['val_loss']}, 'loss')
 
 
-id_to_token = json.load(open('./dataset/vocabulary.json'))
+id_to_token = json.load(open(BASEDIR + 'dataset/vocabulary.json'))
 token_to_id = {token: ID for ID, token in id_to_token.items()}
 id_to_label = {0: '<PAD>', 1: 'B', 2: 'I', 3: 'O'}
 label_to_id = {label: ID for ID, label in id_to_label.items()}
 token_vocab_size, label_vocab_size = len(token_to_id), len(label_to_id)
-file = 'params.hdf5'    # store the model
+file = BASEDIR + 'params.hdf5'    # store the model
 
 # Load Data
 train_raw_tokens, train_norm_tokens, train_token_ids, train_labels, train_label_ids = \
-    load_data('dataset/training.json')
+    load_data(BASEDIR + 'dataset/training.json')
 valid_raw_tokens, valid_norm_tokens, valid_token_ids, valid_labels, valid_label_ids = \
-    load_data('dataset/validation.json')
+    load_data(BASEDIR + 'dataset/validation.json')
 test_raw_tokens, test_norm_tokens, test_token_ids, test_labels, test_label_ids = \
-    load_data('dataset/testing.json')
+    load_data(BASEDIR + 'dataset/testing.json')
 
 # Preprocess
 x_train = pad_sequences(train_token_ids, padding='post')
