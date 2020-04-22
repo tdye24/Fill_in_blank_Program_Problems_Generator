@@ -29,6 +29,8 @@ urlpatterns = [
 	url(r'^user$', view.user),
 	url(r'^teacherIndex$', view.teacher_index),
 	url(r'^teacher$', view.teacher),
+	url(r'^upload$', view.upload),
+	url(r'^generation$', view.generation),
 ]
 
 
