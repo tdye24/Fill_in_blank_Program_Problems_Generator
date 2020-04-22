@@ -4,56 +4,57 @@
 # @name:program2vector
 # @author:TDYe
 keyword2id = {
-	'atoi': 72,
-	'break': 73,
-	'case': 74,
-	'char': 75,
-	'const': 76,
-	'continue': 77,
-	'cos': 78,
-	'do': 79,
-	'double': 80,
-	'else': 81,
-	'exit': 82,
-	'fabs': 83,
-	'fgets': 84,
-	'float': 85,
-	'for': 86,
-	'free': 87,
-	'goto': 88,
-	'if': 89,
-	'int': 90,
-	'long': 91,
-	'main': 92,
-	'malloc': 93,
-	'memset': 94,
-	'pow': 95,
-	'printf': 96,
-	'putchar': 97,
-	'puts': 98,
-	'register': 99,
-	'return': 100,
+	'break': 72,
+	'case': 73,
+	'char': 74,
+	'const': 75,
+	'continue': 76,
+	'do': 77,
+	'double': 78,
+	'else': 79,
+	'float': 80,
+	'for': 81,
+	'goto': 82,
+	'if': 83,
+	'int': 84,
+	'long': 85,
+	'register': 86,
+	'return': 87,
+	'short': 88,
+	'sizeof': 89,
+	'struct': 90,
+	'switch': 91,
+	'typedef': 92,
+	'unsigned': 93,
+	'void': 94,
+	'while': 95,
+
+	'printf': 100,
 	'scanf': 101,
-	'short': 102,
-	'sin': 103,
-	'sizeof': 104,
+	'main': 102,
+	'puts': 103,
+	'strlen': 104,
 	'sqrt': 105,
-	'strcat': 106,
-	'strcmp': 107,
-	'strcpy': 108,
-	'strlen': 109,
-	'strncat': 110,
-	'strncmp': 111,
-	'strncpy': 112,
-	'strstr': 113,
-	'struct': 114,
-	'switch': 115,
-	'tolower': 116,
-	'toupper': 117,
-	'typedef': 118,
-	'unsigned': 119,
-	'void': 120,
-	'while': 121,
+	'strcmp': 106,
+	'pow': 107,
+	'strstr': 108,
+	'malloc': 109,
+	'memset': 110,
+	'fgets': 111,
+	'putchar': 112,
+	'strcat': 113,
+	'tolower': 114,
+	'toupper': 115,
+	'strcpy': 116,
+	'sin': 117,
+	'cos': 118,
+	'fabs': 119,
+	'strncpy': 120,
+	'exit': 121,
+	'atoi': 122,
+	'free': 123,
+	'strncmp': 124,
+	'strncat': 125,
 }
 
 operator2id = {
@@ -89,8 +90,8 @@ operator2id = {
 	'>>': 67,
 	'>>=': 68,
 	'?': 69,
-	'||': 123,
-	'~': 125,
+	'||': 97,
+	'~': 99,
 }
 
 delimiter2id = {
@@ -98,8 +99,8 @@ delimiter2id = {
 	')': 43,
 	'[': 70,
 	']': 71,
-	'{': 122,
-	'}': 124,
+	'{': 96,
+	'}': 98,
 }
 
 setA = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -179,11 +180,12 @@ def remove_comment(path):
 	return content
 
 
-def program2vector(path):
+def transform(path):
+	ids = []
 	content = remove_comment(path)
+	content = content.replace('\t', '    ')
 	symbol = ''
 	state = 0
-	item, next_item = None, None
 	for i in range(len(content)):
 		item = content[i]
 		if i < len(content)-1:
@@ -195,13 +197,17 @@ def program2vector(path):
 				symbol += item
 				if next_item in setC | rightD:  # a*, a)
 					state = 0
-					print(symbol, ' variable')
+					# print(symbol, ' variable')
+					ids.append([symbol, 'var0', 15, 'O'])
+					# TODO(tdye): 区分不同变量值
 				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' function')
+						# print(symbol, ' function')
+						ids.append([symbol, 'func0', 5, 'O'])
 				else:
 					state = 1
 			elif item in {' ', '\n'}:
@@ -216,11 +222,13 @@ def program2vector(path):
 				symbol += item
 				if next_item not in {'+', '='} and pre not in setC:
 					state = 0
-					print(symbol, ' +')     # add +
+					# print(symbol, ' +')     # add +
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				elif pre in setC:   # positive +
 					if next_item not in setB | {' ', '\n', '.'}:
 						state = 0
-						print(symbol, ' +')
+						# print(symbol, ' +')
+						ids.append([symbol, symbol, operator2id[symbol], 'O'])
 					else:
 						state = 8
 				else:
@@ -229,11 +237,13 @@ def program2vector(path):
 				symbol += item
 				if next_item not in {'-', '=', '>'} and pre not in setC:
 					state = 0
-					print(symbol, ' -')     # sub
+					# print(symbol, ' -')     # sub
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				elif pre in setC:
 					if next_item not in setB | {' ', '\n', '.'}:
 						state = 0
-						print(symbol, ' -')
+						# print(symbol, ' -')
+						ids.append([symbol, symbol, operator2id[symbol], 'O'])
 					else:
 						state = 11
 				else:
@@ -242,77 +252,94 @@ def program2vector(path):
 				symbol += item
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' *')
+					# print(symbol, ' *')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 13
 			elif item == '/':
 				symbol += item
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' /')
+					# print(symbol, ' /')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 14
 			elif item == '=':
 				symbol += item
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' =')
+					# print(symbol, ' =')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 15
 			elif item == '!':
 				symbol += item
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' !')
+					# print(symbol, ' !')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 16
 			elif item == '<':
 				symbol += item
 				if next_item not in {'=', '<'}:
 					state = 0
-					print(symbol, '<')
+					# print(symbol, '<')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 17
 			elif item == '>':
 				symbol += item
 				if next_item not in {'>', '='}:
 					state = 0
-					print(symbol, ' >')
+					# print(symbol, ' >')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 19
 			elif item == '&':
 				symbol += item
 				if next_item not in {'&'}:
 					state = 0
-					print(symbol, ' &')
+					# print(symbol, ' &')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 21
 			elif item == '%':
 				symbol += item
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' %')
+					# print(symbol, ' %')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 22
 			elif item in setB:
 				symbol += item
 				if next_item not in setB | {'.'}:
 					state = 0
-					print(symbol, ' numeric constant')
+					# print(symbol, ' numeric constant')
+					ids.append([symbol, 'numeric_constant', 3, 'O'])
 				else:
 					state = 23
 			elif item in setD | {',', ';', '?', ':'}:
 				state = 0
 				symbol += item
-				print(symbol, ' delimiter')
+				if item in setD:
+					# print(symbol, ' delimiter')
+					ids.append([symbol, symbol, delimiter2id[symbol], 'O'])
+				else:
+					# print(symbol, ' operator')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '.':
+				symbol += item
 				state = 0
-				print(symbol, ' .')
+				# print(symbol, ' .')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '|':
 				symbol += item
 				if next_item not in {'|'}:
 					state = 0
-					print(symbol, ' |')
+					# print(symbol, ' |')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 24
 		elif state == 1:
@@ -321,31 +348,40 @@ def program2vector(path):
 				if next_item in setC | rightD:  # a_*, a_)
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' variable')
+						# print(symbol, ' variable')
+						ids.append([symbol, 'var0', 15, 'O'])
 				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' function')
+						# print(symbol, ' function')
+						ids.append([symbol, 'func0', 5, 'O'])
 			elif item in {' ', '\n'}:
 				if next_item in setA | {'_'} | setB | setC | rightD:   # a ), a\n), a *, int a, int _a, return 8
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' variable')
+						# print(symbol, ' variable')
+						ids.append([symbol, 'var0', 15, 'O'])
 				elif next_item in {'(', '{'}:   # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' function')
+						# print(symbol, ' function')
+						ids.append([symbol, 'func0', 5, 'O'])
 				elif next_item in {'['}:
 					state = 0
-					print(symbol, ' variable')
+					# print(symbol, ' variable')
+					ids.append([symbol, 'var0', 15, 'O'])
 				else:
 					state = 2
 		elif state == 2:
@@ -353,22 +389,27 @@ def program2vector(path):
 				if next_item in setA | {'_'} | setB | setC | rightD:  # a  ), a\n ), a  *, int  a, int  _a, return 8
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' variable')
+						# print(symbol, ' variable')
+						ids.append([symbol, 'var0', 15, 'O'])
 				elif next_item in {'(', '{'}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
-						print(symbol, ' keyword')
+						# print(symbol, ' keyword')
+						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
 					else:
-						print(symbol, ' function')
+						# print(symbol, ' function')
+						ids.append([symbol, 'func0', 5, 'O'])
 				else:
 					state = 2
 		elif state == 3:
 			symbol += item
 			if item == '\'':
 				state = 0
-				print(symbol, ' char constant')
+				# print(symbol, ' char constant')
+				ids.append([symbol, 'char_constant', 4, 'O'])
 			elif item == '\\':
 				state = 4
 		elif state == 4:
@@ -379,7 +420,8 @@ def program2vector(path):
 			symbol += item
 			if item == '\"':
 				state = 0
-				print(symbol, ' string constant')
+				# print(symbol, ' string constant')
+				ids.append([symbol, 'string_literal', 2, 'O'])
 			elif item == '\\':
 				state = 6
 		elif state == 6:
@@ -390,10 +432,12 @@ def program2vector(path):
 			symbol += item
 			if item == '+':     # i++
 				state = 0
-				print(symbol, ' ++')
+				# print(symbol, ' ++')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '=':   # i+=
 				state = 0
-				print(symbol, ' +=')
+				# print(symbol, ' +=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 8:
 			if item in {' ', '\n'}:
 				state = 8   # +   6
@@ -401,7 +445,8 @@ def program2vector(path):
 				symbol += item
 				if next_item not in setB | {'.'}:       # + 5end
 					state = 0
-					print(symbol, ' numeric constant')
+					# print(symbol, ' numeric constant')
+					ids.append([symbol, 'numeric_constant', 3, 'O'])
 				else:
 					state = 9
 		elif state == 9:
@@ -409,20 +454,24 @@ def program2vector(path):
 				symbol += item      # +   6.6
 				if next_item not in setB | {'.'}:   # + 5.6end
 					state = 0
-					print(symbol, ' numeric constant')
+					# print(symbol, ' numeric constant')
+					ids.append([symbol, 'numeric_constant', 3, 'O'])
 				else:
 					state = 9
 		elif state == 10:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' -=')
+				# print(symbol, ' -=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '-':
 				state = 0
-				print(symbol, ' --')
+				# print(symbol, ' --')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '>':
 				state = 0
-				print(symbol, ' ->')
+				# print(symbol, ' ->')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 11:
 			if item in {' ', '\n'}:
 				state = 11   # -   6
@@ -430,7 +479,8 @@ def program2vector(path):
 				symbol += item
 				if next_item not in setB | {'.'}:       # + 5end
 					state = 0
-					print(symbol, ' numeric constant')
+					# print(symbol, ' numeric constant')
+					ids.append([symbol, 'numeric_constant', 3, 'O'])
 				else:
 					state = 12
 		elif state == 12:
@@ -438,87 +488,105 @@ def program2vector(path):
 				symbol += item      # -   6.6
 				if next_item not in setB | {'.'}:   # - 6.6end
 					state = 0
-					print(symbol, ' numeric constant')
+					# print(symbol, ' numeric constant')
+					ids.append([symbol, 'numeric_constant', 3, 'O'])
 				else:
 					state = 12
 		elif state == 13:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' *=')
+				# print(symbol, ' *=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 14:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' /=')
+				# print(symbol, ' /=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 15:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' ==')
+				# print(symbol, ' ==')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 16:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' !=')
+				# print(symbol, ' !=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 17:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' <=')
+				# print(symbol, ' <=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '<':
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' <<')
+					# print(symbol, ' <<')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 18
 		elif state == 18:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' <<=')
+				# print(symbol, ' <<=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 19:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' >=')
+				# print(symbol, ' >=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 			elif item == '>':
 				if next_item not in {'='}:
 					state = 0
-					print(symbol, ' >>')
+					# print(symbol, ' >>')
+					ids.append([symbol, symbol, operator2id[symbol], 'O'])
 				else:
 					state = 20
 		elif state == 20:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' >>=')
+				# print(symbol, ' >>=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 21:
 			symbol += item
 			if item == '&':
 				state = 0
-				print(symbol, ' &&')
+				# print(symbol, ' &&')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 22:
 			symbol += item
 			if item == '=':
 				state = 0
-				print(symbol, ' %=')
+				# print(symbol, ' %=')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		elif state == 23:
 			symbol += item
 			if next_item not in setB | {'.'}:
 				state = 0
-				print(symbol, ' numeric constant')
+				# print(symbol, ' numeric constant')
+				ids.append([symbol, 'numeric_constant', 3, 'O'])
 			else:
 				state = 23
 		elif state == 24:
 			symbol += item
 			if item == '|':
 				state = 0
-				print(symbol, ' ||')
+				# print(symbol, ' ||')
+				ids.append([symbol, symbol, operator2id[symbol], 'O'])
 		if state == 0 and len(symbol) > 0:
 			pre = symbol
 			symbol = ''
+	return [ids]
 
 
 if __name__ == '__main__':
-	program2vector(path="sum.cpp")
+	ids_ = transform(path="sum.cpp")
+	for item in ids_:
+		print(item)
