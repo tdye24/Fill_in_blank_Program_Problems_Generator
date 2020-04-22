@@ -9,7 +9,7 @@ import queue
 import MySQLdb
 import config
 import multiprocessing
-from tools import get_test_cases_num, generate_normal_files
+from tools import get_test_cases_num, generate_normal_files, read_out
 from time import sleep
 
 
@@ -27,18 +27,9 @@ def compile_and_exe(submissionId_proId_th_: str, submissionId: str, proId: str, 
 			# out
 			user_out_path = '../data/out/%s-%s.out' % (submissionId_proId_th_, i)
 			answer_out_path = '../data/test_cases/%s/%s.out' % (proId, i)
-			with open(user_out_path, 'r') as f:
-				print('user out')
-				user_out = ''
-				for line in f.readlines():
-					print(line)
-					user_out += line
-			with open(answer_out_path, 'r') as f:
-				print('answer out')
-				answer_out = ''
-				for line in f.readlines():
-					print(line)
-					answer_out += line
+			user_out = read_out(user_out_path)
+			answer_out = read_out(answer_out_path)
+			print('user output: ', user_out, ' answer output', answer_out)
 			if user_out == answer_out:
 				print('The no.%s blank of no.%s submission is right on no.%s test case' % (
 				no_of_blank, submissionId, i))
