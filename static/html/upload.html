@@ -6,6 +6,7 @@
     <title>EFP Online Judge System</title>
     <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/index.css">
+    <link href="/static/dist/ladda-themeless.min.css">
 </head>
 <body>
     <div class="container">
@@ -27,27 +28,64 @@
                         <label for="description">Problem Description</label>
                         <textarea class="form-control" rows="3" name="description"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="problem-file">Problem File</label>
-                        <input type="file" name="problem-file" accept=".c, .cpp">
-                        <p class="help-block">File for generating element fill-in-blank problem.</p>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="problem-file">Problem File</label>
+                            <input type="file" name="problem-file" accept=".c, .cpp" class="form-control">
+                            <p class="help-block">File for generating element fill-in-blank problem.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="test-cases">Test Cases</label>
+                            <input type="file" name="test-cases" accept=".zip" class="form-control">
+                            <p class="help-block">Compress test cases using zip format.</p>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="test-cases">Test Cases</label>
-                        <input type="file" name="test-cases" accept=".zip">
-                        <p class="help-block">Compress test cases using zip format.</p>
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="difficulty">Difficulty</label><br>
+                            <input type="number" name="difficulty" class="form-control">
+                            <p class="help-block">Maximum difficulty is 100.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="score">Score</label><br>
+                            <input type="number" name="score" class="form-control">
+                            <p class="help-block">Default score is 20.</p>
+                        </div>
+                        <div class="col-md-4">
+                                <label>UPLOAD</label><br>
+                                <button class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-cloud-upload">UPLOAD PROBLEM</span></button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="difficulty">Difficulty</label><br>
-                        <input type="number" name="difficulty">
-                        <p class="help-block">Maximum difficulty is 100.</p>
-                    </div>
-                    <p>
-                        <input id="upload" type="submit" class="form-control btn btn-warning" value="UPLOAD"/>
-                    </p>
+
                 </form>
             </div>
         </div>
     </div>
 </body>
+<script src="/static/dist/spin.min.js"></script>
+<script src="/static/dist/ladda.min.js"></script>
+<script>
+
+
+    Ladda.bind( 'div:not(.progress-demo) button', { timeout: 2000 } );
+
+
+    Ladda.bind( '.progress-demo button', {
+        callback: function( instance ) {
+            var progress = 0;
+            var interval = setInterval( function() {
+                progress = Math.min( progress + Math.random() * 0.1, 1 );
+                instance.setProgress( progress );
+
+                if( progress === 1 ) {
+                    instance.stop();
+                    clearInterval( interval );
+                }
+            }, 200 );
+        }
+    } );
+
+
+
+</script>
 </html>
