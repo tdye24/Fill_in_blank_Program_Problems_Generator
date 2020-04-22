@@ -3,15 +3,13 @@
 # @date:2020/3/13 20:44
 # @name:view
 # @author:TDYe
-import json
 import os
-from .tools import unzip_file
-from django.core import serializers
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
 from DBModel.models import User, Problem, Submission, Teacher
 from django.contrib.auth.hashers import make_password, check_password
-
+from Model import program2vector, vector2program, predict
+from .tools import unzip_file
+from logfile import logger
 
 def index(request):
 	"""
@@ -234,21 +232,30 @@ def teacher(request):
 				# The account does not exist.
 				return render(nextURL)
 		elif request.GET.get('action') == 'upload':
-			title = request.POST.get('title')
-			themes = request.POST.get('themes')
-			description = request.POST.get('description')
-			print('title', title)
-			print('themes', themes)
-			print('description', description)
 			id = Problem.get_next_problem_id()
-			filename = "%s%s" % (str(id), '.cpp')
-			print('id', id)
+			origin_filename = "%s-origin%s" % (str(id), '.cpp')
+			problem_filename = "%s%s" % (str(id), '.cpp')
 			problem_file_obj = request.FILES.get('problem-file')
-			problem_file_path = os.path.join('data/problem', filename)
-			f = open(problem_file_path, mode="wb")
+			origin_file_path = os.path.join('data\\problem', origin_filename)
+			problem_file_path = os.path.join('data\\problem', problem_filename)
+
+			f = open(origin_file_path, mode="wb")
 			for i in problem_file_obj.chunks():     # TODO(tdye): using coroutine?
 				f.write(i)
 			f.close()
+			X = program2vector.transform(origin_file_path)
+			X0 = predict.predict(X)[0]
+			program, problem, answer_lst = vector2program.transform(X0, id)
+			answer = ''
+			logger.info('\nOrigin file %d:\n%s' % (id, program))
+			logger.info('\nProblem file %d:\n%s' % (id, problem))
+			for item in answer_lst:
+				answer += item + ','
+			answer = answer[0: -1]
+			logger.info('\nAnswer %d:\n%s' % (id, answer))
+			with open(problem_file_path, mode='w') as f:
+				f.write(problem)
+			os.remove(origin_file_path)
 			test_cases_obj = request.FILES.get('test-cases')
 			if not os.path.exists("%s%s" % ('data/test_cases/', str(id))):
 				os.mkdir("%s%s" % ('data/test_cases/', str(id)))
@@ -263,7 +270,21 @@ def teacher(request):
 			f.close()
 			unzip_file(test_cases_path_rar, test_cases_path)
 			os.remove(test_cases_path_rar)
-			return render(request, 'upload.html', {})
+			# update database
+			title, themes, description, score, author \
+				= request.POST.get('title'), request.POST.get('themes'), request.POST.get('description'), int(request.POST.get('score')), request.session['teacherEmail']
+			try:
+				db_problem = Problem(id=id, title=title, theme=themes, description=description, author=author, score=score, answer=answer)
+				db_problem.save()
+			except ValueError:
+				print("Invalid parameters => (id, title, theme, description, author, )")
+			finally:
+				answer = answer.split(',')
+				request.session['program'] = program
+				request.session['problem-id'] = id
+				request.session['problem'] = problem
+				request.session['answer'] = answer
+				return redirect('/generation')
 	elif request.method == 'GET':
 		if request.GET.get('action') == 'logout':
 			nextURL = request.GET.get('next')
@@ -277,5 +298,12 @@ def upload(request):
 	return render(request, 'upload.html', {})
 
 
-def upload_problem(request):
-	email = request.POST.get('email')
+def generation(request):
+	program = request.session['program']
+	id = request.session['problem-id']
+	problem = request.session['problem']
+	answer = request.session['answer']
+	return render(request, 'generation.html', {'program': program,
+	                                           'problem': problem,
+	                                           'id': id,
+	                                           'answer': answer})
