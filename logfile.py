@@ -4,17 +4,16 @@
 # @name:logfile
 # @author:TDYe
 import logging
-import os.path
 import time
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-date = time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
+date = time.strftime('%Y%m%d', time.localtime(time.time()))
 log_path = 'logs/'
 log_name = log_path + date + '.log'
 logfile = log_name
-fh = logging.FileHandler(logfile, mode='w')
+fh = logging.FileHandler(logfile, mode='a')
 fh.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
