@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EFP Online Judge System</title>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="col-md-8 col-md-offset-2">
+            <h1 style="text-align: center">EFP Online Judge</h1>
+            <p class="lead" style="text-align: center">Element Fill-in-blank Problem Online Judge</p>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 style="font-family: 'Adobe 黑体 Std R'">Origin File {{ id }}</h4>
+                </div>
+                <div class="panel-body" id="origin-file" style="height: 200px"><textarea>{{ program }}</textarea>
+                </div>
+                <div class="panel-heading">
+                    <h4 style="font-family: 'Adobe 黑体 Std R'">Problem File {{ id }}</h4>
+                </div>
+                <div class="panel-body" id="problem-file" style="height: 200px"><textarea>{{ problem }}
+                </textarea>
+                </div>
+                <div class="panel-heading">
+                    <h4 style="font-family: 'Adobe 黑体 Std R'">Correct Answer</h4>
+                </div>
+                <div class="panel-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+
+                            {% for item in answer %}
+                                <label style="margin-top: 5px" for="blank{{ forloop.counter }}" class="col-sm-1 control-label">#{{ forloop.counter }}</label>
+                                <div class="col-sm-3" style="margin-top: 5px">
+                                    <input type="text" class="form-control" id="blank{{ forloop.counter }}" value="{{ item }}">
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="position:fixed; left:79%; bottom:50%; z-index:9999;">
+        <a href="/upload" class="btn btn-info btn-lg">
+          <span class="glyphicon glyphicon-check"></span> CONTINUE UPLOADING
+        </a>
+    </div>
+</body>
+<script src="/static/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    let editor1 = ace.edit("origin-file");
+    editor1.setTheme("ace/theme/monokai");
+    editor1.session.setMode("ace/mode/c_cpp");
+    let editor2 = ace.edit("problem-file");
+    editor2.setTheme("ace/theme/monokai");
+    editor2.session.setMode("ace/mode/c_cpp");
+</script>
+</html>
