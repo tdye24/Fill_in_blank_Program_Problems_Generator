@@ -46,3 +46,10 @@ def generate_normal_files(submissionId_proId_th_):
 	test_cases_num = get_test_cases_num(problem_id)
 	for i in range(test_cases_num):
 		io_redirect(submissionId_proId_th_, str(i+1), str(i+1))
+
+
+def read_out(path: str):
+	out = ''
+	with open(path, 'r') as f:
+		out = f.read()
+	return out
