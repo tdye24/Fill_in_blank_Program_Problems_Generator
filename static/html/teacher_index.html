@@ -3,8 +3,8 @@
     {% if request.session.checkTeacherSignin %}
          <div class="pull-right">
              <p></p>
-             <a target="_blank" class="btn btn-primary" href="upload"><span class="glyphicon glyphicon-tasks"></span> UPLOAD TASKS </a>
-             <a target="_parent" class="btn btn-warning" href="teacher?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-user"></span> LOGOUT </a>
+             <a target="_blank" class="btn btn-primary btn-lg" href="upload"><span class="glyphicon glyphicon-tasks"></span> UPLOAD TASKS </a>
+             <a target="_parent" class="btn btn-info btn-lg" href="teacher?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-log-out"></span> LOGOUT </a>
         </div>
     {% endif %}
 {% endblock %}
