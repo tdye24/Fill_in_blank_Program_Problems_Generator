@@ -43,7 +43,6 @@ class Problem(models.Model):
 	averageScore = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
 	# TODO(tdye): 答案不能用逗号分开，假如答案本身就是逗号呢？
-	file = models.FileField(upload_to='data', default="")
 
 	@staticmethod
 	def get_problem_list(volume):
