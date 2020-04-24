@@ -41,6 +41,7 @@ class Problem(models.Model):
 	author = models.CharField(max_length=20, blank=True, default="anonymity")
 	score = models.IntegerField(default=20)
 	averageScore = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+	blanks = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
 	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
 	# TODO(tdye): 答案不能用逗号分开，假如答案本身就是逗号呢？
 
@@ -84,6 +85,8 @@ class Problem(models.Model):
 
 	@staticmethod
 	def get_next_problem_id():
+		if len(Problem.objects.values('id').order_by('-id')) == 0:
+			return 1001
 		return (Problem.objects.values('id').order_by('-id')[0])['id'] + 1
 
 
