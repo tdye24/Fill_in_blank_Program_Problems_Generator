@@ -129,8 +129,13 @@ if __name__ == '__main__':
 			totalBlanks = len(json.loads(cursor.fetchone()[0]))
 			if totalBlanks == int(no_of_blank):
 				# TODO(tdye): problem occurs when more than one judge client work concurrently
-				cursor.execute("UPDATE dbmodel_submission SET dbmodel_submission.judgeStatus = 0 where dbmodel_submission.submissionId = " + str(submissionId))
-				# update average score
+				# update average score and judge status
+				cursor.execute(
+					"UPDATE dbmodel_problem SET averageScore = "
+					"(SELECT AVG(score) FROM dbmodel_submission WHERE proId = " + proId + ")	"
+					" WHERE id = " + proId)
+				cursor.execute(
+					"UPDATE dbmodel_submission SET judgeStatus = 0 WHERE submissionId = " + str(submissionId))
 				db.commit()
 			cursor.close()
 			sleep(1)
