@@ -29,6 +29,15 @@ class User(models.Model):
 		"""
 		return [(i + 1) for i in range(int(User.objects.count() / 20) + 1)]
 
+	@staticmethod
+	def get_my_submissions(email, volume):
+		return Submission.objects.filter(email=email).values('submissionId', 'proId', 'judgeStatus', 'score'). \
+			order_by('-submissionId')[(volume - 1) * 20: volume * 20]
+
+	@staticmethod
+	def get_my_submissions_volumes(email):
+		return [(i + 1) for i in range(int(Submission.objects.filter(email=email).count() / 20) + 1)]
+
 	def signin(self):
 		pass    # TODO(tdye): Object Oriented
 
@@ -38,12 +47,12 @@ class Problem(models.Model):
 	title = models.CharField(max_length=50, default="")
 	theme = models.CharField(validators=[validate_comma_separated_integer_list], max_length=100, blank=True, default="")
 	description = models.TextField(blank=True, default="")
-	author = models.CharField(max_length=20, blank=True, default="anonymity")
+	# author = models.CharField(max_length=20, blank=True, default="anonymity")
+	author = models.EmailField(null=False, default='')
 	score = models.IntegerField(default=20)
 	averageScore = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-	blanks = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
-	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
-	# TODO(tdye): 答案不能用逗号分开，假如答案本身就是逗号呢？
+	blanks = models.CharField(max_length=255, default="")
+	answer = models.CharField(max_length=255, default="")
 
 	@staticmethod
 	def get_problem_list(volume):
@@ -93,10 +102,10 @@ class Problem(models.Model):
 class Submission(models.Model):
 	submissionId = models.AutoField(primary_key=True, default=10001)
 	submitTime = models.DateTimeField(default=timezone.now)
-	judgeStatus = models.BooleanField(default='0')
+	judgeStatus = models.IntegerField(default=-1)
 	proId = models.IntegerField(default=1000)
-	answer = models.CharField(validators=[validate_comma_separated_integer_list], max_length=255, default="")
-	author = models.CharField(max_length=20, default='')
+	answer = models.CharField(max_length=255, default="")
+	email = models.EmailField(null=False, default="")
 	score = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 	@staticmethod
@@ -116,17 +125,26 @@ class Submission(models.Model):
 		"""
 		return [(i + 1) for i in range(int(Submission.objects.count() / 20) + 1)]
 
+	@staticmethod
+	def get_next_submission_id():
+		if len(Submission.objects.values('submissionId').order_by('-submissionId')) == 0:
+			return 10001
+		return (Submission.objects.values('submissionId').order_by('-submissionId')[0])['submissionId'] + 1
+
 
 class Teacher(models.Model):
 	email = models.EmailField(null=False, primary_key=True, unique=True)
 	password = models.CharField(max_length=128)
 	nickname = models.CharField(max_length=20)
 
-	def signin(self):
-		pass
+	@staticmethod
+	def get_my_repository(email, volume):
+		return Problem.objects.filter(author=email).values('id', 'title', 'averageScore', 'score'). \
+			       order_by('-id')[(volume - 1) * 20: volume * 20]
 
-	def upload(self, time, proId):
-		email = self.email
+	@staticmethod
+	def get_my_repository_volumes(email):
+		return [(i + 1) for i in range(int(Problem.objects.filter(email=email).count() / 20) + 1)]
 
 
 class Upload(models.Model):
