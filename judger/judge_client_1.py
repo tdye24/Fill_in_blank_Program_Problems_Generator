@@ -3,6 +3,7 @@
 # @date:2020/4/5 10:15
 # @name:tcp_socket_client
 # @author:TDYe
+import json
 import socket
 import subprocess
 import queue
@@ -13,8 +14,12 @@ from tools import get_test_cases_num, generate_normal_files, read_out
 from time import sleep
 
 
+# from logfile import logger
+
+
 def compile_and_exe(submissionId_proId_th_: str, submissionId: str, proId: str, no_of_blank: str, i: str):
-	compile_cmd = "g++ ../data/submissions/%s-normal-%s.cpp -o ../data/exe/%s-normal-%s.exe -O2 2>../data/compile_info/%s-normal-%s.txt" % (submissionId_proId_th_, i, submissionId_proId_th_, i, submissionId_proId_th_, i)
+	compile_cmd = "g++ ../data/submissions/%s-normal-%s.cpp -o ../data/exe/%s-normal-%s.exe -O2 2>../data/compile_info/%s-normal-%s.txt" % (
+	submissionId_proId_th_, i, submissionId_proId_th_, i, submissionId_proId_th_, i)
 	compile_p = subprocess.Popen(compile_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	compile_p.communicate()
 	if compile_p.returncode == 0:  # compile successfully
@@ -32,10 +37,14 @@ def compile_and_exe(submissionId_proId_th_: str, submissionId: str, proId: str, 
 			print('user output: ', user_out, ' answer output', answer_out)
 			if user_out == answer_out:
 				print('The no.%s blank of no.%s submission is right on no.%s test case' % (
-				no_of_blank, submissionId, i))
+					no_of_blank, submissionId, i))
+				# logger.info('The no.%s blank of no.%s submission is right on no.%s test case' % (
+				# no_of_blank, submissionId, i))
+				return True
 			else:  # TODO(tdye): add presentation error and other errors ...
 				print('The no.%s blank of no.%s submission is wrong on no.%s test case' % (
-				no_of_blank, submissionId, i))
+					no_of_blank, submissionId, i))
+				return False
 	# TODO(tdye): fail to compile
 	# cursor.execute(
 	# 	"UPDATE dbmodel_submission SET judgeStatus = 0, score = " + str(20) + " where runId = " + str(run_id))
@@ -86,19 +95,42 @@ if __name__ == '__main__':
 			generate_normal_files(submissionId_proId_th)
 			test_cases_num = get_test_cases_num(proId)
 			pool = multiprocessing.Pool()  # default 4
+			resultList = []
 			for i in range(test_cases_num):
-				pool.apply_async(compile_and_exe, args=(submissionId_proId_th, submissionId, proId, no_of_blank, str(i + 1), ))
+				res = pool.apply_async(compile_and_exe,
+				                       args=(submissionId_proId_th, submissionId, proId, no_of_blank, str(i + 1),))
+				resultList.append(res)
 			pool.close()
 			pool.join()
+			finalResult = True
+			for res in resultList:
+				finalResult = finalResult and res.get()
 			print('client 1 finished judging no.%s blank of no.%s submission' % (no_of_blank, submissionId))
-			# if i+1 == test_cases_num:
-			# 	try:
-			# 		cursor.execute(
-			# 			"UPDATE dbmodel_submission SET judgeStatus = 0 where proId = " + submissionId)
-			# 		db.commit()
-			# 	except Exception as e_:
-			# 		print(e_)
-			# 		db.rollback()
-			# 	#   db.close()
-			# 	# TODO(tdye): need to close the db?
+			# logger.info('client 1 finished judging no.%s blank of no.%s submission' % (no_of_blank, submissionId))
+			if finalResult:
+				cursor.execute(
+					"SELECT answer, score from dbmodel_problem where id = " + proId)
+				answerString, score = cursor.fetchone()
+				addScore = score / len(json.loads(answerString))
+				cursor.execute(
+					"SELECT email from dbmodel_submission where submissionId = " + str(submissionId))
+				email, = cursor.fetchone()
+				cursor.execute(
+					"UPDATE dbmodel_user SET dbmodel_user.score = dbmodel_user.score + " + str(
+						addScore) + " where email = '" + str(email) + "'")
+				db.commit()
+				cursor.execute(
+					"UPDATE dbmodel_submission SET dbmodel_submission.score = dbmodel_submission.score + " +
+					str(addScore) + " where submissionId = " + str(submissionId))
+				db.commit()
+				# TODO(tdye): need to close the db?
+			cursor.execute(
+				"SELECT answer from dbmodel_problem where id = " + proId)
+			totalBlanks = len(json.loads(cursor.fetchone()[0]))
+			if totalBlanks == int(no_of_blank):
+				# TODO(tdye): problem occurs when more than one judge client work concurrently
+				cursor.execute("UPDATE dbmodel_submission SET dbmodel_submission.judgeStatus = 0 where dbmodel_submission.submissionId = " + str(submissionId))
+				# update average score
+				db.commit()
+			cursor.close()
 			sleep(1)
