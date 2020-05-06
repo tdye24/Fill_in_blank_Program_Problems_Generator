@@ -34,14 +34,14 @@ def get_submission():
 		sleep(1)
 		try:    # TODO(tdye): maybe needs a mutex lock
 			cursor.execute(
-				"SELECT submissionId, proId, answer from dbmodel_submission where judgeStatus = -1")
+				"SELECT submissionId, proId, answer from dbmodel_submission where judgeStatus = -2")
 			data = cursor.fetchall()
 			for item in data:
 				blank_nums = len(item[2].split(','))
 				for th in range(blank_nums):
 					queue_.put('%s-%s-%s' % (str(item[0]), str(item[1]), str(th+1)))
 				# -2 -> waiting
-				cursor.execute("UPDATE dbmodel_submission SET judgeStatus = -2 WHERE submissionId = %d" % item[0])
+				cursor.execute("UPDATE dbmodel_submission SET judgeStatus = -1 WHERE submissionId = %d" % item[0])
 			db.commit()
 		except Exception as _e:
 			print(_e)
