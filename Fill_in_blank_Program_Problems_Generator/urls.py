@@ -31,6 +31,7 @@ urlpatterns = [
 	url(r'^teacher$', view.teacher),
 	url(r'^upload$', view.upload),
 	url(r'^generation$', view.generation),
+	url(r'^submit$', view.submit)
 ]
 
 
