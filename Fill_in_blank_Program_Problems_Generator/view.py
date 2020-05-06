@@ -4,12 +4,16 @@
 # @name:view
 # @author:TDYe
 import os
+import json
+from Model.vector2program import clean_c_style
 from django.shortcuts import render, redirect
 from DBModel.models import User, Problem, Submission, Teacher
 from django.contrib.auth.hashers import make_password, check_password
 from Model import program2vector, vector2program, predict
 from .tools import unzip_file
 from logfile import logger
+from judger.tools import read_out
+
 
 def index(request):
 	"""
@@ -19,6 +23,12 @@ def index(request):
 	"""
 	problemList = Problem.get_problem_list(volume=1)
 	problemVolumes = Problem.get_problem_volumes()
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'index.html', {
 								'problemList': problemList,
 								'problemVolume': 1,
@@ -28,12 +38,13 @@ def index(request):
 								'rankTabClass': '',
 								'problemContentClass': '',
 								'statusContentClass': 'hidden',
-								'rankContentClass': 'hidden', })
+								'rankContentClass': 'hidden',
+								'submissions': submissions, })
 
 
 def user(request):
 	"""
-	user signup, signin, checkLogin/
+	user signup, signin, checkSignin/
 	:param request:
 	:return:
 	"""
@@ -50,6 +61,11 @@ def user(request):
 					request.session['email'] = user.email
 					request.session['nickname'] = user.nickname
 					request.session['score'] = str(user.score)
+					submissions = []
+					for item in User.get_my_submissions(email=email, volume=1):
+						item['score'] = str(item['score'])
+						submissions.append(item)
+					request.session['submissions'] = json.dumps(submissions)
 					return redirect(nextURL)
 				else:
 					# The password is wrong.
@@ -68,7 +84,8 @@ def user(request):
 				next = request.GET.get('next')
 				return redirect(next)
 			except ValueError:
-				print("Invalid parameters => (email, password, nickname)")
+				print("Invalid parameters => (%s, %s, %s) while saving a user!" % (email, password, nickname))
+				logger.error("Invalid parameters => (%s, %s, %s) while saving a user!" % (email, password, nickname))
 		else:
 			return render(request, 'register.html')
 	elif request.method == 'GET':
@@ -101,6 +118,12 @@ def get_problem_list(request):
 	problemVolume = eval(request.GET.get('volume'))
 	problemList = Problem.get_problem_list(volume=problemVolume)
 	problemVolumes = Problem.get_problem_volumes()
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'index.html', {'problemList': problemList,
 	                                      'problemVolume': problemVolume,
 	                                      'problemVolumes': problemVolumes,
@@ -109,7 +132,8 @@ def get_problem_list(request):
 	                                      'rankTabClass': '',
 	                                      'problemContentClass': '',
 	                                      'statusContentClass': 'hidden',
-	                                      'rankContentClass': 'hidden', })
+	                                      'rankContentClass': 'hidden',
+	                                      'submissions': submissions, })
 
 
 def get_problem_by_id(request):
@@ -120,13 +144,26 @@ def get_problem_by_id(request):
 	"""
 	id = eval(request.GET.get('id'))
 	problem = Problem.get_problem_by_id(id=id)
+	problemFile = read_out('data/problem/' + str(id) + '.cpp')
+	sampleIn = read_out('data/test_cases/' + str(id) + '/1.in')
+	sampleOut = read_out('data/test_cases/' + str(id) + '/1.out')
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'problem.html', {'problem': problem,
+	                                        'problemFile': problemFile,
+	                                        'sampleIn': sampleIn,
+	                                        'sampleOut': sampleOut,
 	                                        'problemTabClass': 'active',
 	                                        'statusTabClass': '',
 	                                        'rankTabClass': '',
 	                                        'problemContentClass': '',
 	                                        'statusContentClass': 'hidden',
-	                                        'rankContentClass': 'hidden', })
+	                                        'rankContentClass': 'hidden',
+	                                        'submissions': submissions, })
 
 
 def get_problem_by_keyword(request):
@@ -145,6 +182,12 @@ def get_problem_by_theme(request):
 	problemVolume = eval(request.GET.get('volume'))
 	problemList = Problem.get_problem_list_by_theme(theme=theme, problemVolume=problemVolume)
 	problemVolumes = Problem.get_problem_volumes_by_theme(theme=theme)
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'theme.html', {
 							'problemList': problemList,
 	                        'theme': theme,
@@ -155,7 +198,8 @@ def get_problem_by_theme(request):
 							'rankTabClass': '',
 							'problemContentClass': '',
 							'statusContentClass': 'hidden',
-							'rankContentClass': 'hidden', })
+							'rankContentClass': 'hidden',
+							'submissions': submissions, })
 
 
 def get_status_list(request):
@@ -167,6 +211,12 @@ def get_status_list(request):
 	statusVolume = eval(request.GET.get('volume'))
 	statusList = Submission.get_status_list(statusVolume=statusVolume)
 	statusVolumes = Submission.get_status_volumes()
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'index.html', {'statusList': statusList,
 	                                      'statusVolume': statusVolume,
 	                                      'statusVolumes': statusVolumes,
@@ -175,7 +225,8 @@ def get_status_list(request):
 	                                      'rankTabClass': '',
 	                                      'problemContentClass': 'hidden',
 	                                      'statusContentClass': '',
-	                                      'rankContentClass': 'hidden', })
+	                                      'rankContentClass': 'hidden',
+	                                      'submissions': submissions, })
 
 
 def get_ranklist(request):
@@ -187,6 +238,12 @@ def get_ranklist(request):
 	ranklistVolume = eval(request.GET.get('volume'))
 	ranklist = User.get_ranklist(ranklistVolume=ranklistVolume)
 	ranklistVolumes = User.get_ranklist_volumes()
+	submissions = []
+	if request.session['checkSignin']:
+		email = request.session['email']
+		for item in User.get_my_submissions(email=email, volume=1):
+			item['score'] = str(item['score'])
+			submissions.append(item)
 	return render(request, 'index.html', {'ranklist': ranklist,
 	                                      'ranklistVolume': ranklistVolume,
 	                                      'ranklistVolumes': ranklistVolumes,
@@ -195,20 +252,79 @@ def get_ranklist(request):
 	                                      'rankTabClass': 'active',
 	                                      'problemContentClass': 'hidden',
 	                                      'statusContentClass': 'hidden',
-	                                      'rankContentClass': '', })
+	                                      'rankContentClass': '',
+	                                      'submissions': submissions, })
 
 
 def submit(request):
-	pass
+	if request.session['checkSignin']:
+		email = request.session['email']
+		# nickname = request.session['nickname']
+		submission = []
+		for key in request.POST.keys():
+			submission.append(request.POST.get(key))
+		proId = eval(request.GET.get('proId'))
+		jsonDataPath = 'data\\jsonData\\%s.json' % str(proId)
+		with open(jsonDataPath) as f:
+			X0 = (json.load(f))[0]
+		raw_tokens = [item[0] for item in X0]
+		problemInfo = Problem.objects.values('answer', 'blanks').filter(id=proId)[0]
+		# answer_lst = json.loads(problemInfo['answer'])
+		# TODO(tdye): not used answer_lst
+		blanks_lst = json.loads(problemInfo['blanks'])
+		i = 0
+		submissionId = Submission.get_next_submission_id()
+		while i < len(blanks_lst):
+			j = 0
+			temp = raw_tokens
+			submissionPath = 'data\\submissions\\%d-%d-%d.cpp' % (submissionId, proId, i+1)
+			while j < len(blanks_lst):
+				if j == i:
+					temp[blanks_lst[j]] = submission[i]
+				j += 1
+			assembleContent = ''
+			for item in temp:
+				assembleContent += item + ' '
+			with open(submissionPath, 'w') as f:
+				f.write(clean_c_style(assembleContent))
+			i += 1
+		try:
+			dbSubmission = Submission(submissionId=submissionId, judgeStatus=-2, proId=proId, email=email, answer=json.dumps(submission))
+			dbSubmission.save()
+		except IOError as e:
+			logger.error(e)
+			logger.error('IO Error occurs while saving a new Submission %d' % submissionId)
+		finally:
+			return redirect('/getStatusList?volume=1')
+	else:
+		# request.session['errmsg'] = 'Please Login First'
+		return render(request, 'upload.html', {})
 
 
 def teacher_index(request):
-	return render(request, 'teacher_index.html')
+	repository = []
+	if request.session['checkTeacherSignin']:
+		email = request.session['teacherEmail']
+		for item in Teacher.get_my_repository(email=email, volume=1):
+			item['averageScore'] = str(item['averageScore'])
+			item['score'] = str(item['score'])
+			repository.append(item)
+	problemDB = Problem.objects.values('theme')
+	problemDBInfo = {}
+	for problem in problemDB:
+		themeList = (problem['theme']).split(',')
+		for theme in themeList:
+			if theme in problemDBInfo.keys():
+				problemDBInfo[theme] += 1
+			else:
+				problemDBInfo[theme] = 1
+	return render(request, 'teacher_index.html', {'repository': repository,
+	                                              'problemDBInfo': problemDBInfo})
 
 
 def teacher(request):
 	"""
-	teacher signup, signin, checkLogin/
+	teacher signup, signin, checkSignin/
 	:param request:
 	:return:
 	"""
@@ -224,6 +340,12 @@ def teacher(request):
 					request.session['checkTeacherSignin'] = True
 					request.session['teacherEmail'] = teacher.email
 					request.session['teacherNickname'] = teacher.nickname
+					repository = []
+					for item in Teacher.get_my_repository(email=email, volume=1):
+						item['averageScore'] = str(item['averageScore'])
+						item['score'] = str(item['score'])
+						repository.append(item)
+					request.session['repository'] = json.dumps(repository)
 					return redirect(nextURL)
 				else:
 					# The password is wrong.
@@ -235,6 +357,7 @@ def teacher(request):
 			id = Problem.get_next_problem_id()
 			origin_filename = "%s-origin%s" % (str(id), '.cpp')
 			problem_filename = "%s%s" % (str(id), '.cpp')
+			jsonData_filename = "%s%s" % (str(id), '.json')
 			problem_file_obj = request.FILES.get('problem-file')
 			origin_file_path = os.path.join('data\\problem', origin_filename)
 			problem_file_path = os.path.join('data\\problem', problem_filename)
@@ -244,15 +367,15 @@ def teacher(request):
 				f.write(i)
 			f.close()
 			X = program2vector.transform(origin_file_path)
+			jsonDataPath = os.path.join('data\\jsonData', jsonData_filename)
+			with open(jsonDataPath, mode='w', encoding='utf-8') as f:
+				json.dump(X, f)
 			X0 = predict.predict(X)[0]
-			program, problem, answer_lst = vector2program.transform(X0, id)
-			answer = ''
+			program, problem, blanks_lst, answer_lst = vector2program.transform(X0, id)
 			logger.info('\nOrigin file %d:\n%s' % (id, program))
 			logger.info('\nProblem file %d:\n%s' % (id, problem))
-			for item in answer_lst:
-				answer += item + ','
-			answer = answer[0: -1]
-			logger.info('\nAnswer %d:\n%s' % (id, answer))
+			logger.info('\nBlanks %d:\n%s' % (id, blanks_lst))
+			logger.info('\nAnswer %d:\n%s' % (id, answer_lst))
 			with open(problem_file_path, mode='w') as f:
 				f.write(problem)
 			os.remove(origin_file_path)
@@ -261,6 +384,7 @@ def teacher(request):
 				os.mkdir("%s%s" % ('data/test_cases/', str(id)))
 			else:
 				print('directory already exists')
+				logger.error('Directory -%s%s already exists' % ('data/test_cases/', str(id)))
 				return False
 			test_cases_path_rar = os.path.join('data/test_cases', str(id), str(id)+'.zip')
 			test_cases_path = os.path.join('data/test_cases', str(id))
@@ -274,16 +398,16 @@ def teacher(request):
 			title, themes, description, score, author \
 				= request.POST.get('title'), request.POST.get('themes'), request.POST.get('description'), int(request.POST.get('score')), request.session['teacherEmail']
 			try:
-				db_problem = Problem(id=id, title=title, theme=themes, description=description, author=author, score=score, answer=answer)
+				db_problem = Problem(id=id, title=title, theme=themes, description=description, author=author, score=score, answer=json.dumps(answer_lst), blanks=json.dumps(blanks_lst))
 				db_problem.save()
 			except ValueError:
-				print("Invalid parameters => (id, title, theme, description, author, )")
+				print("Invalid parameters => (%d, %s, %s, %s, %s, ) while saving a problem!" % (id, title, themes, description, author))
+				logger.error("Invalid parameters => (%d, %s, %s, %s, %s, ) while saving a problem!" % (id, title, themes, description, author))
 			finally:
-				answer = answer.split(',')
 				request.session['program'] = program
 				request.session['problem-id'] = id
 				request.session['problem'] = problem
-				request.session['answer'] = answer
+				request.session['answer'] = answer_lst
 				return redirect('/generation')
 	elif request.method == 'GET':
 		if request.GET.get('action') == 'logout':
