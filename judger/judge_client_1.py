@@ -1,7 +1,7 @@
 # ！usr/bin/python
 # -*- coding:utf-8 -*-#
 # @date:2020/4/5 10:15
-# @name:tcp_socket_client
+# @name:tcp_socket_client_1
 # @author:TDYe
 import json
 import socket
