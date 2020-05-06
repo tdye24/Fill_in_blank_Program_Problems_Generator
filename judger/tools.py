@@ -5,6 +5,7 @@
 # @author:TDYe
 import re
 import os
+# from logfile import logger
 
 
 def get_test_cases_num(proId: str):
@@ -50,6 +51,11 @@ def generate_normal_files(submissionId_proId_th_):
 
 def read_out(path: str):
 	out = ''
-	with open(path, 'r') as f:
-		out = f.read()
-	return out
+	try:
+		with open(path, 'r') as f:
+			out = f.read()
+	except IOError as e:
+		print(e)
+		# logger.error(e)
+	finally:
+		return out
