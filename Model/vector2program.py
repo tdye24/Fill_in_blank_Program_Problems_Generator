@@ -125,8 +125,8 @@ def clean_c_style(code: str):
 
 
 def transform(vector: [], id: int):
-	program, problem, answer_lst, blank_num = assemble(vector)
-	if blank_num == 0:
+	program, problem, blanks_lst, answer_lst = assemble(vector)
+	if len(blanks_lst) == 0:
 		logger.info('Model generates ZERO blank for problem %d!' % id)
 		# for i in range(len(vector)):
 		# 	probability = random.random()
@@ -135,36 +135,32 @@ def transform(vector: [], id: int):
 		for _ in range(len(vector)//10):
 			randId = random.randint(int(len(vector)*1/4), int(len(vector)*3/4))
 			vector[randId][3] = 'B'
-		program, problem, answer_lst, blank_num = assemble(vector)
-		logger.info('System generates %d blanks randomly for problem %d.' % (blank_num, id))
+		program, problem, blanks_lst, answer_lst = assemble(vector)
+		logger.info('System generates %d blanks randomly for problem %d.' % (len(blanks_lst), id))
 	else:
-		logger.info('Model generates %d blanks for problem %d.' % (blank_num, id))
+		logger.info('Model generates %d blanks for problem %d.' % (len(blanks_lst), id))
 	program = clean_c_style(program)
 	problem = clean_c_style(problem)
-	return program, problem, answer_lst
+	return program, problem, blanks_lst, answer_lst
 
 
 def assemble(vector: []):
-	blank_num = 0
 	program = ''
 	problem = ''
+	blanks_lst = []
 	answer_lst = []
 	for item in vector:
 		program += item[0] + " "
 	i = 0
 	while i < len(vector):
-		if vector[i][3] == 'B':
+		if vector[i][3] == 'B' or (vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}):
 			problem += '__' + ' '
 			answer_lst.append(vector[i][0])
-			blank_num += 1
-		elif vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}:
-			problem += '__' + ' '
-			answer_lst.append(vector[i][0])
-			blank_num += 1
+			blanks_lst.append(i)
 		else:
 			problem += vector[i][0] + ' '
 		i += 1
-	return program, problem, answer_lst, blank_num
+	return program, problem, blanks_lst, answer_lst
 
 
 if __name__ == '__main__':
