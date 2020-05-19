@@ -33,12 +33,10 @@ def get_submission():
 		sleep(1)
 		try:    # TODO(tdye): maybe needs a mutex lock
 			cursor.execute(
-				"SELECT submissionId, proId, answer from dbmodel_submission where judgeStatus = -2")
+				"SELECT submissionId, proId from dbmodel_submission where judgeStatus = -2")
 			data = cursor.fetchall()
 			for item in data:
-				blank_nums = len(item[2].split(','))
-				for th in range(blank_nums):
-					queue_.put('%s-%s-%s' % (str(item[0]), str(item[1]), str(th+1)))
+				queue_.put('%s-%s' % (str(item[0]), str(item[1])))
 				# -2 -> waiting
 				cursor.execute("UPDATE dbmodel_submission SET judgeStatus = -1 WHERE submissionId = %d" % item[0])
 			db.commit()
@@ -55,15 +53,15 @@ def deal_client(newSocket: socket, addr):
 		sleep(1)
 		try:
 			if status and not queue_.empty():
-				submissionId_proId_th = queue_.get()
-				print(submissionId_proId_th)
-				newSocket.send(("judge|%s" % submissionId_proId_th).encode())
+				submissionId_proId = queue_.get()
+				print(submissionId_proId)
+				newSocket.send(("judge|%s" % submissionId_proId).encode())
 				data = newSocket.recv(1024)
 				recv_data = data.decode()
 				if recv_data == 'gotten':
 					status = False
 				else:
-					queue_.put(submissionId_proId_th)
+					queue_.put(submissionId_proId)
 			else:
 				newSocket.send('get_status'.encode())
 				data = newSocket.recv(1024)
