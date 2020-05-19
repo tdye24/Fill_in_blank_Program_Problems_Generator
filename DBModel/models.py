@@ -146,6 +146,10 @@ class Teacher(models.Model):
 	def get_my_repository_volumes(email):
 		return [(i + 1) for i in range(int(Problem.objects.filter(email=email).count() / 20) + 1)]
 
+	@staticmethod
+	def view_answer(proId):
+		return Problem.objects.filter(id=proId).values('answer')
+
 
 class Upload(models.Model):
 	email = models.EmailField()
@@ -154,3 +158,25 @@ class Upload(models.Model):
 
 	class Meta:
 		unique_together = ('email', 'proId')
+
+
+class Admin(models.Model):
+	email = models.EmailField(null=False, primary_key=True, unique=True)
+	password = models.CharField(max_length=128)
+	nickname = models.CharField(max_length=20)
+
+	@staticmethod
+	def delete_user(email):
+		pass
+
+	@staticmethod
+	def delete_problem(proId):
+		pass
+
+	@staticmethod
+	def delete_teacher(email):
+		pass
+
+	@staticmethod
+	def add_teacher(email, password, nickname):
+		pass
