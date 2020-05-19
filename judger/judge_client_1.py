@@ -1,7 +1,7 @@
 # ！usr/bin/python
 # -*- coding:utf-8 -*-#
-# @date:2020/4/5 10:15
-# @name:tcp_socket_client_1
+# @date:2020/4/5 15:01
+# @name:tcp_socket_client_2
 # @author:TDYe
 import json
 import socket
@@ -49,7 +49,7 @@ def compile_and_exe(submissionId_proId_th_: str, submissionId: str, proId: str, 
 	# cursor.execute(
 	# 	"UPDATE dbmodel_submission SET judgeStatus = 0, score = " + str(20) + " where runId = " + str(run_id))
 	# db.commit()
-	# print('client 1 finished judging : %s' % run_id)
+	# print('client 2 finished judging : %s' % run_id)
 
 
 if __name__ == '__main__':
@@ -108,34 +108,52 @@ if __name__ == '__main__':
 			print('client 1 finished judging no.%s blank of no.%s submission' % (no_of_blank, submissionId))
 			# logger.info('client 1 finished judging no.%s blank of no.%s submission' % (no_of_blank, submissionId))
 			if finalResult:
-				cursor.execute(
-					"SELECT answer, score from dbmodel_problem where id = " + proId)
-				answerString, score = cursor.fetchone()
-				addScore = score / len(json.loads(answerString))
-				cursor.execute(
-					"SELECT email from dbmodel_submission where submissionId = " + str(submissionId))
-				email, = cursor.fetchone()
-				cursor.execute(
-					"UPDATE dbmodel_user SET dbmodel_user.score = dbmodel_user.score + " + str(
-						addScore) + " where email = '" + str(email) + "'")
-				db.commit()
-				cursor.execute(
-					"UPDATE dbmodel_submission SET dbmodel_submission.score = dbmodel_submission.score + " +
-					str(addScore) + " where submissionId = " + str(submissionId))
-				db.commit()
+				try:
+					cursor.execute(
+						"SELECT answer, score from dbmodel_problem where id = " + proId)
+					answerString, score = cursor.fetchone()
+					addScore = score / len(json.loads(answerString))
+				except Exception as e:
+					print(e, "Exception occurs when calculating addScore.")
+				try:
+					cursor.execute(
+						"SELECT email from dbmodel_submission where submissionId = " + str(submissionId))
+					email, = cursor.fetchone()
+				except Exception as e:
+					print(e, "Exception occurs when fetching email of specified submission id.")
+				try:
+					cursor.execute(
+						"UPDATE dbmodel_user SET dbmodel_user.score = dbmodel_user.score + " + str(
+							addScore) + " where email = '" + str(email) + "'")
+					db.commit()
+				except Exception as e:
+					print(e, "Exception occurs when updating user's score.")
+				try:
+					cursor.execute(
+						"UPDATE dbmodel_submission SET dbmodel_submission.score = dbmodel_submission.score + " +
+						str(addScore) + " where submissionId = " + str(submissionId))
+					db.commit()
+				except Exception as e:
+					print(e, "Exception occurs when updating submission's score.")
 				# TODO(tdye): need to close the db?
-			cursor.execute(
-				"SELECT answer from dbmodel_problem where id = " + proId)
-			totalBlanks = len(json.loads(cursor.fetchone()[0]))
+			try:
+				cursor.execute(
+					"SELECT answer from dbmodel_problem where id = " + proId)
+				totalBlanks = len(json.loads(cursor.fetchone()[0]))
+			except Exception as e:
+				print(e, "Exception occurs when fetching the total num of blanks.")
 			if totalBlanks == int(no_of_blank):
 				# TODO(tdye): problem occurs when more than one judge client work concurrently
 				# update average score and judge status
-				cursor.execute(
-					"UPDATE dbmodel_problem SET averageScore = "
-					"(SELECT AVG(score) FROM dbmodel_submission WHERE proId = " + proId + ")	"
-					" WHERE id = " + proId)
-				cursor.execute(
-					"UPDATE dbmodel_submission SET judgeStatus = 0 WHERE submissionId = " + str(submissionId))
-				db.commit()
+				try:
+					cursor.execute(
+						"UPDATE dbmodel_problem SET averageScore = "
+						"(SELECT AVG(score) FROM dbmodel_submission WHERE proId = " + proId + ")	"
+						" WHERE id = " + proId)
+					cursor.execute(
+						"UPDATE dbmodel_submission SET judgeStatus = 0 WHERE submissionId = " + str(submissionId))
+					db.commit()
+				except Exception as e:
+					print(e, "Exception occurs when updating judge status and average score.")
 			cursor.close()
 			sleep(1)
