@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EFP Online Judge System</title>
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>EFP Online Judge</h1>
+                <p class="lead">Element Fill-in-blank Problem Online Judge</p>
+            </div>
+            {% if not request.session.checkAdminSignin %}
+                <div class="pull-right">
+                    <p></p>
+                    <a class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">
+                        <span class="glyphicon glyphicon-log-in"> LOGIN </span>
+                    </a>
+                </div>
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">
+                                </button>
+                                <h4 class="modal-title" id="myModalLabel" align="center">
+                                    ADMINISTRATOR LOGIN
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="admin?action=signin">
+                                    <div id="email" class="form-group">
+                                        <label for="inputEmail">E-Mail</label>
+                                        <input class="form-control" type="email" id="inputEmail" name="email" placeholder="Email" />
+                                    </div>
+                                    <div id="password" class="form-group">
+                                        <label for="inputPassword">Password</label>
+                                        <input class="form-control" type="password" id="inputPassword" name="password" placeholder="Password" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-warning" data-dismiss="modal">
+                                    CLOSE
+                                </button>
+                                <button type="button" class="btn btn-info" id="signin">
+                                    LOGIN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if request.session.checkAdminSignin %}
+                <div class="pull-right">
+                    <p></p>
+                    <a target="_parent" class="btn btn-info btn-lg" href="admin?action=dashboard">
+                        <span class="glyphicon glyphicon-dashboard"> DASHBOARD </span>
+                    </a>
+                    <a target="_parent" class="btn btn-warning btn-lg" href="admin?action=logout&&next={{ request.get_full_path }}">
+                        <span class="glyphicon glyphicon-log-out"> LOGOUT </span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+<script>
+    $.ready(
+        $('#signin').click(function () {
+            $.ajax(
+                {
+                    url: 'admin?action=signin',
+                    method: 'POST',
+                    contentType: 'json',
+                    data: JSON.stringify({
+                        email: $('#inputEmail').val(),
+                        password: $('#inputPassword').val(),
+                    }),
+                    success: function (res) {
+                        if(res.status == 1)
+                            self.location = 'admin?action=dashboard'
+                        else {
+                            self.location = 'admin'
+                            alert(res.msg)
+                        }
+                    }
+                }
+            )
+        })
+    )
+</script>
+</html>
