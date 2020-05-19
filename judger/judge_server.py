@@ -22,8 +22,7 @@ try:
 		db=config.db_name,
 		charset=config.db_charset)
 except Exception as e:
-	print("fail to connect database")
-	print(e)
+	print(e, "Fail to connect database")
 	exit(1)
 
 
