@@ -38,22 +38,69 @@ def compile_and_exe(submissionId: str, proId: str, noBlank: str, noCase):
 			answer_out_path = '../data/test_cases/%s/%s.out' % (proId, noCase)
 			user_out = read_out(user_out_path)
 			answer_out = read_out(answer_out_path)
-			print('user output: ', user_out, ' answer output', answer_out)
+			print('user output: ', user_out, 'answer output:', answer_out)
 			if user_out == answer_out:
-				print('The no.%s blank of no.%s submission is right on no.%s test case' % (
+				print('The no.%s blank of no.%s submission is right on %sth test case.' % (
 					noBlank, submissionId, noCase))
 				# logger.info('The no.%s blank of no.%s submission is right on no.%s test case' % (
 				# no_of_blank, submissionId, i))
 				return True
 			else:  # TODO(tdye): add presentation error and other errors ...
-				print('The no.%s blank of no.%s submission is wrong on no.%s test case' % (
+				print('The no.%s blank of no.%s submission is wrong on %sth test case.' % (
 					noBlank, submissionId, noCase))
 				return False
+			print("Exe Error")
+			return False
+	else:
+		print("Compile Error")
+		return False
 	# TODO(tdye): fail to compile
 	# cursor.execute(
 	# 	"UPDATE dbmodel_submission SET judgeStatus = 0, score = " + str(20) + " where runId = " + str(run_id))
 	# db.commit()
 	# print('client 2 finished judging : %s' % run_id)
+
+
+def compile_and_exe_without_test_cases(submissionId: str, proId: str, noBlank: str):
+	compile_cmd = "g++ ../data/submissions/%s-%s-%s-normal-%s.cpp " \
+	              "-o ../data/exe/%s-%s-%s-normal-%s.exe " \
+	              "-O2 2>../data/compile_info/%s-%s-%s-normal-%s.txt" \
+	              % (submissionId, proId, noBlank, str(1),
+	                 submissionId, proId, noBlank, str(1),
+	                 submissionId, proId, noBlank, str(1))
+	compile_p = subprocess.Popen(compile_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	compile_p.communicate()
+	if compile_p.returncode == 0:  # compile successfully
+		# add include file #include<bits/stdc++.h> and IO redirect
+		exe_cmd = "cd ../data/exe && %s-%s-%s-normal-%s.exe" % (submissionId, proId, noBlank, str(1))
+		exe_p = subprocess.Popen(exe_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		exe_out, exe_err = exe_p.communicate()
+		exe_p.wait()
+		if exe_p.returncode == 0:  # exe successfully
+			# out
+			user_out_path = '../data/out/%s-%s-%s-%s.out' % (submissionId, proId, noBlank, str(1))
+			answer_out_path = '../data/test_cases/%s/%s.out' % (proId, str(1))
+			user_out = read_out(user_out_path)
+			answer_out = read_out(answer_out_path)
+			print('user output: %s' % user_out)
+			print('answer output: %s' % answer_out)
+			print(user_out == answer_out)
+			if user_out == answer_out:
+				print('The no.%s blank of no.%s submission is right.' % (
+					noBlank, submissionId))
+				# logger.info('The no.%s blank of no.%s submission is right on no.%s test case' % (
+				# no_of_blank, submissionId, i))
+				return True
+			else:  # TODO(tdye): add presentation error and other errors ...
+				print('The no.%s blank of no.%s submission is wrong.' % (
+					noBlank, submissionId))
+				return False
+		else:
+			print("Exe Error")
+			return False
+	else:
+		print("Compile Error")
+		return False
 
 
 if __name__ == '__main__':
@@ -111,6 +158,10 @@ if __name__ == '__main__':
 				for j in range(test_cases_num):
 					res = pool.apply_async(compile_and_exe,
 					                       args=(str(submissionId), str(proId), str(i+1), str(j+1),))
+					resultList.append(res)
+				if test_cases_num == 0:  # no test cases like print("Hello World")
+					res = pool.apply_async(compile_and_exe_without_test_cases,
+					                 args=(str(submissionId), str(proId), str(i + 1),))
 					resultList.append(res)
 				pool.close()
 				pool.join()
