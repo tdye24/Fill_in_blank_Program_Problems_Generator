@@ -4,18 +4,90 @@
          <div class="pull-right">
              <p></p>
              <a target="_blank" class="btn btn-primary btn-lg" href="upload"><span class="glyphicon glyphicon-tasks"></span> UPLOAD TASKS </a>
-             <a target="_parent" class="btn btn-info btn-lg" href="teacher?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-log-out"></span> LOGOUT </a>
+             <a target="_parent" class="btn btn-warning btn-lg" href="teacher?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-log-out"></span> LOGOUT </a>
         </div>
     {% endif %}
 {% endblock %}
 
 {% block registerBlock %}
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel" align="center">
+                        ANSWER
+                    </h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-dismiss="modal">
+                        CLOSE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="row">
-            <div class="col-md-8">
-                INFOS OF PROBLEM BANK
+            <div class="well col-md-8">
+                <div class="col-md-6 col-md-offset-3">
+                    <h3 style="text-align: center">View Answer</h3>
+                    <input id="proId" class="form-control" placeholder="Input the problem id." style="width: 80%; float: left">
+                    {% if request.session.checkTeacherSignin %}
+                    <a id="viewAnswer" target="_parent" class="btn btn-warning" href="javascrit:void(0);" onclick="lookAnswer($('#proId').val())" data-toggle="modal" data-target="#myModal" style="width: 20%">
+                        <span class="glyphicon glyphicon-eye-open">View</span>
+                    </a>
+                    {% endif %}
+                    {% if not request.session.checkTeacherSignin %}
+                    <a id="viewAnswer" disabled target="_parent" class="btn btn-warning" href="javascrit:void(0);" onclick="javascript: alert('Please sign in!')" style="width: 20%">
+                        <span class="glyphicon glyphicon-eye-open">View</span>
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 col-md-offset-3">
+                    <h3 style="text-align: center">BANK INFOS</h3>
+                    {% for theme, count in problemDBInfo.items %}
+                        <div>
+                        {{ theme }}: {{ count }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
             {% if request.session.checkTeacherSignin %}
+            <div class="well pull-right col-md-4">
+                <div>
+                    Username: {{ request.session.teacherNickname }}<br>
+                </div>
+                <div>
+                    <table style="table-layout: fixed;" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th colspan="3">ID</th>
+                                <th colspan="6">Title</th>
+                                <th colspan="3">Average</th>
+                                <th colspan="3">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in repository %}
+                            <tr>
+                                <th style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ item.id }}">
+                                    <a href="getProblemById?id={{ item.id }}">{{ item.id }}</a>
+                                </th>
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="6" title="{{ item.title }}">{{ item.title }}</td>
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ item.averageScore }}">{{ item.averageScore }}</td>
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ item.score }}">{{ item.score }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div class="well pull-right col-md-4 hidden">
             {% endif %}
             {% if not request.session.checkTeacherSignin %}
@@ -46,4 +118,34 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scriptBlock %}
+    <script>
+    function lookAnswer(id) {
+        if(id == "") {
+            alert("Please enter the question number correctly")
+            return false
+        }
+
+
+        $.ajax({
+            url: `admin?action=lookAnswer&id=${id}`,
+            method: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                if(res.status == 1) {
+                    let html = ``
+                    for(let i=0; i<res.data.length; i++) {
+                        html += `<p><b>${i+1}</b>:   ${res.data[i]}</p>`
+                    }
+                    $('.modal-body').html(html)
+                } else {
+                    return false
+                }
+
+            }
+        })
+    }
+    </script>
 {% endblock %}
