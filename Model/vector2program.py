@@ -124,8 +124,8 @@ def clean_c_style(code: str):
 	return out
 
 
-def transform(vector: [], id: int):
-	program, problem, blanks_lst, answer_lst = assemble(vector)
+def transform(vector: [], id: int, difficulty):
+	program, problem, blanks_lst, answer_lst = assemble(vector, difficulty=difficulty)
 	if len(blanks_lst) == 0:
 		logger.info('Model generates ZERO blank for problem %d!' % id)
 		# for i in range(len(vector)):
@@ -135,7 +135,7 @@ def transform(vector: [], id: int):
 		for _ in range(len(vector)//10):
 			randId = random.randint(int(len(vector)*1/4), int(len(vector)*3/4))
 			vector[randId][3] = 'B'
-		program, problem, blanks_lst, answer_lst = assemble(vector)
+		program, problem, blanks_lst, answer_lst = assemble(vector, difficulty=difficulty)
 		logger.info('System generates %d blanks randomly for problem %d.' % (len(blanks_lst), id))
 	else:
 		logger.info('Model generates %d blanks for problem %d.' % (len(blanks_lst), id))
@@ -144,16 +144,32 @@ def transform(vector: [], id: int):
 	return program, problem, blanks_lst, answer_lst
 
 
-def assemble(vector: []):
+def assemble(vector: [], difficulty):
 	program = ''
 	problem = ''
+	source_lst = []
+	random_lst = []
 	blanks_lst = []
 	answer_lst = []
-	for item in vector:
-		program += item[0] + " "
 	i = 0
 	while i < len(vector):
-		if vector[i][3] == 'B' or (vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}):
+		program += vector[i][0] + " "
+		if vector[i][3] == 'B':
+			source_lst.append(i)
+		elif vector[i][3] == 'I' and i-1 >= 0 and vector[i-1][3] == 'B':
+			source_lst.append(i)
+			vector[i][3] = 'B'
+		# if vector[i][3] == 'B' or (vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}):
+		# 	source_lst.append(i)
+		i += 1
+	random_lst_len = max(int(len(source_lst) * difficulty / 100), 1)
+	while len(random_lst) < random_lst_len:
+		x = random.randint(0, random_lst_len-1)
+		if source_lst[x] not in random_lst:
+			random_lst.append(source_lst[x])
+	i = 0
+	while i < len(vector):
+		if i in random_lst:
 			problem += '__' + ' '
 			answer_lst.append(vector[i][0])
 			blanks_lst.append(i)
