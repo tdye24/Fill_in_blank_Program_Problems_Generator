@@ -27,11 +27,11 @@ urlpatterns = [
 	url(r'^getRanklist$', view.get_ranklist),
     url(r'^register$', view.register),
 	url(r'^user$', view.user),
-	url(r'^teacherIndex$', view.teacher_index),
 	url(r'^teacher$', view.teacher),
 	url(r'^upload$', view.upload),
 	url(r'^generation$', view.generation),
-	url(r'^submit$', view.submit)
+	url(r'^submit$', view.submit),
+	url(r'^admin$', view.admin),
 ]
 
 
