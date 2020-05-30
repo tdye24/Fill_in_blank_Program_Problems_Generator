@@ -65,9 +65,11 @@ class Problem(models.Model):
 
 	@staticmethod
 	def get_problem_by_id(id):
+		from Model.themes import themes
 		problem = Problem.objects.values(
 			'id', 'title', 'theme', 'author', 'description', 'answer', 'averageScore', 'score').filter(id=id)[0]
 		problem['theme'] = problem['theme'].split(',')
+		problem['theme'] = {theme: themes[theme] for theme in problem['theme']}
 		problem['blanksNums'] = [(i + 1) for i in range(len(problem['answer'].split(',')))]
 		del (problem['answer'])
 		return problem
@@ -106,7 +108,7 @@ class Submission(models.Model):
 	proId = models.IntegerField(default=1000)
 	answer = models.CharField(max_length=255, default="")
 	email = models.EmailField(null=False, default="")
-	score = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+	score = models.DecimalField(max_digits=10, decimal_places=4, default=0)
 
 	@staticmethod
 	def get_status_list(statusVolume):
@@ -115,7 +117,7 @@ class Submission(models.Model):
 		:param statusVolume:
 		:return:
 		"""
-		return Submission.objects.all().order_by('-submissionId')[(statusVolume - 1) * 20: statusVolume * 20]
+		return Submission.objects.values('submissionId', 'submitTime', 'judgeStatus', 'proId', 'score', 'answer', 'email').order_by('-submissionId')[(statusVolume - 1) * 20: statusVolume * 20]
 
 	@staticmethod
 	def get_status_volumes():
