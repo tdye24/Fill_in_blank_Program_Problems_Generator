@@ -42,9 +42,32 @@ def io_redirect(submissionId_proId_th_: str, i: str, o: str):
 			f1.write(content)
 
 
+def io_redirect_without_test_cases(submissionId_proId_th_: str, o: str):
+	content = ''
+	problem_id = submissionId_proId_th_.split('-')[1]
+	out_path = '../out/%s-%s.out' % (submissionId_proId_th_, o)
+	path = '../data/submissions/%s.cpp' % submissionId_proId_th_
+	try:
+		f = open(file=path, mode='r', encoding='utf-8')
+		for line in f.readlines():
+			content += line
+	except IOError:
+		print("reading file failed")
+	finally:
+		f.close()
+		# add include file #include<bits/stdc++.h> and IO redirect
+		content = '#include<bits/stdc++.h>\nusing namespace std;\n' + content
+		content = re.sub(r'main\s*\(.*?\)\s*{', "main() {\n    freopen(\"%s\",\"w\",stdout);" % out_path, content)
+		with open('../data/submissions/%s-normal-%s.cpp' % (submissionId_proId_th_, o), 'w') as f1:
+			f1.write(content)
+
+
 def generate_normal_files(submissionId_proId_th_):
 	problem_id = submissionId_proId_th_.split('-')[1]    # str
 	test_cases_num = get_test_cases_num(problem_id)
+	if test_cases_num == 0:
+		io_redirect_without_test_cases(submissionId_proId_th_, str(1))
+		return True
 	for i in range(test_cases_num):
 		io_redirect(submissionId_proId_th_, str(i+1), str(i+1))
 
