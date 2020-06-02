@@ -10,9 +10,30 @@
 <body>
     <div class="container">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-5">
                 <h1>EFP Online Judge</h1>
                 <p class="lead">Element Fill-in-blank Problem Online Judge</p>
+            </div>
+            <div class="col-md-4">
+                    <form class="form-inline" role="form" method="get" style="margin-top: 60px" action="getProblemListBy">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="query" name="query" placeholder="Input query string." style="width: 135px">
+                        </div>
+                        <div class="form-group">
+                            <select id="way" name="way" style="border-radius: 5px; width: 50px; height: 34px; outline: none">
+                                <option>
+                                    id
+                                </option>
+                                <option>
+                                    title
+                                </option>
+                                <option>
+                                    theme
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-default">Search</button>
+                    </form>
             </div>
 
 
@@ -20,13 +41,15 @@
                 {% if request.session.checkSignin %}
                     <div class="pull-right">
                         <p></p>
-                        <a target="_parent" class="btn btn-warning" href="user?action=logout&&next={{ request.get_full_path }}"><span class="glyphicon glyphicon-user"></span>LOGOUT</a>
+                        <a target="_parent" class="btn btn-warning btn-lg" href="user?action=logout&&next={{ request.get_full_path }}">
+                            <span class="glyphicon glyphicon-log-out"> LOGOUT </span>
+                        </a>
                     </div>
                 {% endif %}
                 {% if not request.session.checkSignin %}
                     <div class="pull-right">
                         <p></p>
-                        New here? <a target="_parent" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
+                        NEW HERE?<a target="_parent" class="btn btn-info" href="register?next={{ request.get_full_path }}">CREATE AN ACCOUNT</a>
                     </div>
                 {% endif %}
             {% endblock %}
@@ -110,9 +133,9 @@
                                         <th colspan="3">Run ID</th>
                                         <th colspan="8">Submit Time</th>
                                         <th colspan="3">Pro.ID</th>
-                                        <th colspan="4">Status</th>
-                                        <th colspan="5">Score</th>
-                                        <th colspan="5">Author</th>
+                                        <th colspan="3">Status</th>
+                                        <th colspan="4">Score</th>
+                                        <th colspan="8">Author</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -123,9 +146,17 @@
                                         <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ status.proId }}">
                                             <a href="getProblemById?id={{ status.proId }}">{{ status.proId }}</a>
                                         </td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="{{ status.judgeStatus }}">{{ status.judgeStatus }}</td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ status.score }}">{{ status.score }}</td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ status.author }}">{{ status.author }}</td>
+                                        {% ifequal status.judgeStatus -2%}
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="waiting">waiting</td>
+                                        {% endifequal %}
+                                        {% ifequal status.judgeStatus -1%}
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="judging">judging</td>
+                                        {% endifequal %}
+                                        {% ifequal status.judgeStatus 0%}
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="OK">OK</td>
+                                        {% endifequal %}
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="{{ status.score }}">{{ status.score }}</td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="8" title="{{ status.email }}">{{ status.email }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -156,6 +187,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="row" colspan="2">Rank</th>
+                                        <th colspan="5">Email</th>
                                         <th colspan="5">Author</th>
                                         <th colspan="5">Score</th>
                                     </tr>
@@ -164,6 +196,7 @@
                                 {% for author in  ranklist%}
                                     <tr>
                                         <th scope="row" colspan="2" title="{{ forloop.counter }}">{{ forloop.counter }}</th>
+                                        <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ author.email }}">{{ author.email }}</td>
                                         <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ author.nickname }}">{{ author.nickname }}</td>
                                         <td style="overflow: hidden ; text-overflow: ellipsis; white-space: nowrap;" colspan="5" title="{{ author.score }}">{{ author.score }}</td>
                                     </tr>
@@ -201,6 +234,44 @@
 
 
             {% if request.session.checkSignin %}
+            <div class="well pull-right col-md-4">
+                <div>
+                    Username: {{ request.session.nickname }}<br>
+                    Score: {{ request.session.score }}
+                </div>
+                <div>
+                    <table style="table-layout: fixed;" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th colspan="3">ID</th>
+                                <th colspan="3">Pro</th>
+                                <th colspan="4">Status</th>
+                                <th colspan="4">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for submit in submissions %}
+                            <tr>
+                                <th scope="row" colspan="3" title="{{ submit.submissionId }}">{{ submit.submissionId }}</th>
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="3" title="{{ submit.proId }}">
+                                    <a href="getProblemById?id={{ submit.proId }}">{{ submit.proId }}</a>
+                                </td>
+                                {% ifequal submit.judgeStatus -2%}
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="waiting">waiting</td>
+                                {% endifequal %}
+                                {% ifequal submit.judgeStatus -1%}
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="judging">judging</td>
+                                {% endifequal %}
+                                {% ifequal submit.judgeStatus 0%}
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="OK">OK</td>
+                                {% endifequal %}
+                                <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" colspan="4" title="{{ submit.score }}">{{ submit.score }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div class="well pull-right col-md-4 hidden" id="login-form-wrap">
             {% endif %}
             {% if not request.session.checkSignin %}
