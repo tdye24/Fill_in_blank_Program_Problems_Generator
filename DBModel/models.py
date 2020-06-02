@@ -75,6 +75,26 @@ class Problem(models.Model):
 		return problem
 
 	@staticmethod
+	def get_problem_list_by_keyword(keyword, problemVolume):
+		"""
+		get specified them and volume problem list
+		:param keyword:
+		:param problemVolume:
+		:return:
+		"""
+		return Problem.objects.filter(title__contains=keyword).values('id', 'title', 'averageScore', 'score'). \
+			       order_by('id')[(problemVolume - 1) * 20: problemVolume * 20]
+
+	@staticmethod
+	def get_problem_volumes_by_keyword(keyword):
+		"""
+		get specified keyword problem volumes
+		:param keyword:
+		:return: like [1, 2, ..., 10, ...]
+		"""
+		return [(i + 1) for i in range(int(Problem.objects.filter(title__contains=keyword).count() / 20) + 1)]
+
+	@staticmethod
 	def get_problem_list_by_theme(theme, problemVolume):
 		"""
 		get specified them and volume problem list
