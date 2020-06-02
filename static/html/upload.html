@@ -14,7 +14,7 @@
             <div class="col-md-8 col-md-offset-2">
                 <h1 style="text-align: center">EFP Online Judge</h1>
                 <p class="lead" style="text-align: center">Element Fill-in-blank Problem Online Judge</p>
-                <form role="form" method="post" action="teacher?action=upload" enctype="multipart/form-data">
+                <form role="form" method="post" action="teacher?action=upload" enctype="multipart/form-data" onsubmit="return check()">
                     <div class="form-group">
                         <label for="title" style="font-family: 'Adobe 黑体 Std R'">Problem Title</label>
                         <input type="text" class="form-control" name="title" placeholder="Please input problem title.">
@@ -53,7 +53,12 @@
                         </div>
                         <div class="col-md-4">
                                 <label>UPLOAD</label><br>
-                                <button class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-cloud-upload">UPLOAD PROBLEM</span></button>
+                                {% if request.session.checkTeacherSignin %}
+                                    <button id="upload" class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-cloud-upload">UPLOAD PROBLEM</span></button>
+                                {% endif %}
+                                {% if not request.session.checkTeacherSignin %}
+                                    <button id="upload" disabled class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-cloud-upload">UPLOAD PROBLEM</span></button>
+                                {% endif %}
                         </div>
                     </div>
 
@@ -64,6 +69,7 @@
 </body>
 <script src="/static/dist/spin.min.js"></script>
 <script src="/static/dist/ladda.min.js"></script>
+<script src="/static/js/jquery-3.3.1.min.js"></script>
 <script>
 
 
@@ -87,5 +93,39 @@
 
 
 
+</script>
+
+<script>
+    function check() {
+        if($('input[name="title"]').val() === "") {
+            alert("please input the problem title.")
+            return false
+        }
+        if($('input[name="themes"]').val() === "") {
+            alert("please input the problem themes.")
+            return false
+        }
+        if($('textarea[name="description"]').val() === "") {
+            alert("please input the problem description.")
+            return false
+        }
+        if($('input[name="problem-file"]').val() === "") {
+            alert("please input the problem file.")
+            return false
+        }
+        if($('input[name="test-cases"]').val() === "") {
+            alert("please input the test cases.")
+            return false
+        }
+        if($('input[name="difficulty"]').val() === "") {
+            alert("please input the difficulty of the problem.")
+            return false
+        }
+        if($('input[name="score"]').val() === "") {
+            alert("please input the score of the problem.")
+            return false
+        }
+        return true
+    }
 </script>
 </html>
