@@ -1,10 +1,11 @@
 {% extends "index.html" %}
 {% block myTabContentBlock %}
+    <link href="/static/dist/ladda-themeless.min.css">
     <div id="problemContent">
         <h3 style="color:blue; text-align: center">{{ problem.id }} {{ problem.title }} ({{ problem.score }}')</h3>
         <div style="text-align: center;">
-            {% for theme in problem.theme %}
-            <a href="getProblemByTheme?theme={{ theme }}&volume=1" class="btn btn-default btn-sm">
+            {% for id, theme in problem.theme.items %}
+            <a href="getProblemByTheme?theme={{ id }}&volume=1" class="btn btn-default btn-sm">
               <span class="glyphicon glyphicon-tag">{{ theme }}</span>
             </a>
             {% endfor %}
@@ -22,76 +23,106 @@
             <div class="panel-heading">
                 <h4 style="font-family: 'Adobe 黑体 Std R'">Element Fill-in-blank Problem</h4>
             </div>
-            <div class="panel-body" id="editor" style="height: 200px"><textarea>#include<bits/stdc++.h>
-using namespace std;
-int main() {
-    int n, sum;
-    scanf("%d", &n);
-    for(int i=0; i<n; i++) {
-        sum += i;
-    }
-    printf("%d", sum);
-    return 0;
-}
-                </textarea>
+            <div class="panel-body" id="editor" style="height: 200px"><textarea>{{ problemFile }}
+            </textarea>
 
             </div>
-            <div class="panel-heading">
-                <h4 style="font-family: 'Adobe 黑体 Std R'">Input Specification</h4>
-            </div>
-            <div class="panel-body">
-                Input Specification
-            </div>
-            <div class="panel-heading">
-                <h4 style="font-family: 'Adobe 黑体 Std R'">Output Specification</h4>
-            </div>
-            <div class="panel-body">
-                Output Specification
-            </div>
+{#            <div class="panel-heading">#}
+{#                <h4 style="font-family: 'Adobe 黑体 Std R'">Input Specification</h4>#}
+{#            </div>#}
+{#            <div class="panel-body">#}
+{#                Input Specification#}
+{#            </div>#}
+{#            <div class="panel-heading">#}
+{#                <h4 style="font-family: 'Adobe 黑体 Std R'">Output Specification</h4>#}
+{#            </div>#}
+{#            <div class="panel-body">#}
+{#                Output Specification#}
+{#            </div>#}
             <div class="panel-heading">
                 <h4 style="font-family: 'Adobe 黑体 Std R'">Sample Input</h4>
             </div>
-            <div class="panel-body">
-                Sample Input
+            <div class="panel-body" id="sampleIn" style="height: 100px"><textarea>{{ sampleIn }}
+                </textarea>
             </div>
             <div class="panel-heading">
                 <h4 style="font-family: 'Adobe 黑体 Std R'">Sample Output</h4>
             </div>
-            <div class="panel-body">
-                Sample Output
+            <div class="panel-body" id="sampleOut" style="height: 100px"><textarea>{{ sampleOut }}
+                </textarea>
             </div>
             <div class="panel-heading">
                 <h4 style="font-family: 'Adobe 黑体 Std R'">Submit Area</h4>
             </div>
             <div class="panel-body">
-                <form class="form-horizontal" role="form">
+                <form class="form-horizontal" role="form" method="post" action="submit?proId={{ problem.id }}">
                     <div class="form-group">
 
                         {% for blanksNum in problem.blanksNums %}
                             <label style="margin-top: 5px" for="blank{{ blanksNum }}" class="col-sm-1 control-label">#{{ blanksNum }}</label>
                             <div class="col-sm-3" style="margin-top: 5px">
-                                <input type="text" class="form-control" id="blank{{ blanksNum }}" placeholder="fill in the no.{{ blanksNum }} blank">
+                                <input type="text" class="form-control" name="blank{{ blanksNum }}" id="blank{{ blanksNum }}" placeholder="fill in the no.{{ blanksNum }} blank">
                             </div>
 
                         {% endfor %}
 
                     </div>
-
-
-
+                    <div style="text-align: center">
+                        {% if request.session.checkSignin %}
+                            <button class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-send"> SUBMIT </span></button>
+                        {% endif %}
+                        {% if not request.session.checkSignin %}
+                            <button disabled class="btn btn-warning btn-lg ladda-button" data-style="slide-left"><span class="ladda-label glyphicon glyphicon-send"> SUBMIT </span></button>
+                        {% endif %}
+                    </div>
                 </form>
             </div>
+
         </div>
     </div>
 {% endblock %}
 
 
 {% block scriptBlock %}
+    <script src="/static/dist/spin.min.js"></script>
+    <script src="/static/dist/ladda.min.js"></script>
+    <script>
+
+
+    Ladda.bind( 'div:not(.progress-demo) button', { timeout: 2000 } );
+
+
+    Ladda.bind( '.progress-demo button', {
+        callback: function( instance ) {
+            var progress = 0;
+            var interval = setInterval( function() {
+                progress = Math.min( progress + Math.random() * 0.1, 1 );
+                instance.setProgress( progress );
+
+                if( progress === 1 ) {
+                    instance.stop();
+                    clearInterval( interval );
+                }
+            }, 200 );
+        }
+    } );
+
+
+
+    </script>
     <script src="/static/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-<script>
-    let editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    editor.session.setMode("ace/mode/c_cpp");
-</script>
+    <script>
+        let editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/c_cpp");
+
+        let sampleInEditor = ace.edit("sampleIn");
+        sampleInEditor.setTheme("ace/theme/chrome");
+        sampleInEditor.session.setMode("ace/mode/c_cpp");
+
+        let sampleOutEditor = ace.edit("sampleOut");
+        sampleOutEditor.setTheme("ace/theme/chrome");
+        sampleOutEditor.session.setMode("ace/mode/c_cpp");
+    </script>
 {% endblock %}
 
