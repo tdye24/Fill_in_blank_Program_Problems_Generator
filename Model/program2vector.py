@@ -200,11 +200,13 @@ def transform(path):
 					# print(symbol, ' variable')
 					ids.append([symbol, 'var0', 15, 'O'])
 					# TODO(tdye): 区分不同变量值
-				elif next_item in {'(', '{'}:    # else {,  hello(, main(
+				elif next_item in {'(', '{', '['}:    # else {,  hello(, main(
 					state = 0
 					if is_keyword(symbol):
 						# print(symbol, ' keyword')
 						ids.append([symbol, symbol, keyword2id[symbol], 'O'])
+					elif next_item in {'['}:
+						ids.append([symbol, 'var0', 15, 'O'])
 					else:
 						# print(symbol, ' function')
 						ids.append([symbol, 'func0', 5, 'O'])
