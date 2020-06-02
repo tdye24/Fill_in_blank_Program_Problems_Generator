@@ -55,20 +55,24 @@ def build(token_vocab_size_, label_vocab_size_, use_crf=False, token_emb_size=50
     # Word Embedding -> Dropout
     x = Embedding(input_dim=token_vocab_size_, output_dim=token_emb_size)(token_ids)
     x = Dropout(0.5)(x)
+    x = Conv1D(64, 5, padding='same', activation='relu', strides=1)(x)
 
-    # Bidirectional LSTM
-    x = Bidirectional(LSTM(units=lstm_units, return_sequences=True))(x)  # return the last output
+    # Bidirectional RNN
+
+    x = Bidirectional(SimpleRNN(50, return_sequences=True))(x)  # return the last output
 
     # Conditional Random Fields (CRF)
-    if use_crf:
-        pred = CRF(label_vocab_size_, learn_mode='join')(x)
-        loss, accuracy = crf_loss, crf_accuracy
-    else:
-        pred = Dense(label_vocab_size_, activation='softmax')(x)
-        loss, accuracy = 'categorical_crossentropy', 'accuracy'
+    # if use_crf:
+    #     pred = CRF(label_vocab_size_, learn_mode='join')(x)
+    #     loss, accuracy = crf_loss, crf_accuracy
+    # else:
+    #     pred = Dense(label_vocab_size_, activation='softmax')(x)
+    #     loss, accuracy = 'categorical_crossentropy', 'accuracy'
+    pred = Dense(label_vocab_size_, activation='softmax')(x)
+    loss, accuracy = 'categorical_crossentropy', 'accuracy'
 
     model = Model(inputs=token_ids, outputs=pred)
-    model.compile(optimizer='adam', loss=loss, metrics=[accuracy])
+    model.compile(optimizer='adagrad', loss=loss, metrics=[accuracy])
     return model
 
 
@@ -100,15 +104,15 @@ def run():
                                       save_best_only=True, save_weights_only=True, mode='auto')
 
     # Build Model
-    model = build(token_vocab_size, label_vocab_size, use_crf=True, token_emb_size=50, lstm_units=100)
+    model = build(168, label_vocab_size, use_crf=True, token_emb_size=50, lstm_units=100)
     model.summary()
 
     # Train Model
     history = model.fit(x_train, y_train, validation_data=(x_valid, y_valid),
-                        callbacks=[modelCheckpoint], epochs=100, batch_size=8)
+                        callbacks=[modelCheckpoint], epochs=50, batch_size=8)
 
     # Plot Training History
-    plot_history({'Training': history.history['crf_accuracy'], 'Validation': history.history['val_crf_accuracy']},
+    plot_history({'Training': history.history['acc'], 'Validation': history.history['acc']},
                  'accuracy')
     plot_history({'Training': history.history['loss'], 'Validation': history.history['val_loss']}, 'loss')
 
@@ -122,7 +126,7 @@ file = BASEDIR + 'params.hdf5'    # store the model
 
 # Load Data
 train_raw_tokens, train_norm_tokens, train_token_ids, train_labels, train_label_ids = \
-    load_data(BASEDIR + 'dataset/training.json')
+    load_data(BASEDIR + 'dataset/training-all.json')
 valid_raw_tokens, valid_norm_tokens, valid_token_ids, valid_labels, valid_label_ids = \
     load_data(BASEDIR + 'dataset/validation.json')
 test_raw_tokens, test_norm_tokens, test_token_ids, test_labels, test_label_ids = \
