@@ -23,6 +23,7 @@ urlpatterns = [
 	url(r'^getProblemById$', view.get_problem_by_id),
 	url(r'^getProblemByTheme$', view.get_problem_by_theme),
 	url(r'^getProblemByKeyword$', view.get_problem_by_keyword),
+	url(r'^getProblemListBy$', view.get_problem_list_by),
 	url(r'^getStatusList$', view.get_status_list),
 	url(r'^getRanklist$', view.get_ranklist),
     url(r'^register$', view.register),
