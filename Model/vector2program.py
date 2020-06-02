@@ -162,7 +162,12 @@ def assemble(vector: [], difficulty):
 		# if vector[i][3] == 'B' or (vector[i][3] == 'I' and i - 1 >= 0 and vector[i - 1][3] in {'B', 'I'}):
 		# 	source_lst.append(i)
 		i += 1
-	random_lst_len = max(int(len(source_lst) * difficulty / 100), 1)
+	random_lst_len = int(len(source_lst) * difficulty / 100)
+	# 0 blanks automatically generated
+	if random_lst_len == 0:
+		random_lst_len = 1
+		source_lst.append(random.randint(0, len(vector) - 1))
+
 	while len(random_lst) < random_lst_len:
 		x = random.randint(0, random_lst_len-1)
 		if source_lst[x] not in random_lst:
