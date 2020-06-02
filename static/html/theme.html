@@ -11,11 +11,11 @@
         <span style="font-size: large; ">Volume</span>
         {% for volume in problemVolumes %}
             {% ifequal problemVolume volume %}
-            <a href="getProblemByTheme?theme={{ theme }}&volume={{ volume }}">
+            <a href="getProblemByTheme?theme={{ themeId }}&volume={{ volume }}">
                 <span style="font-size: large; color: red">{{volume}}</span>
             </a>
             {% else %}
-            <a href="getProblemByTheme?theme={{ theme }}&volume={{ volume }}">
+            <a href="getProblemByTheme?theme={{ themeId }}&volume={{ volume }}">
                 <span style="font-size: large;">{{volume}}</span>
             </a>
             {% endifequal %}
