@@ -436,7 +436,7 @@ def teacher(request):
 					return redirect(nextURL)
 			else:
 				# The account does not exist.
-				return render(nextURL)
+				return redirect(nextURL)
 		elif request.GET.get('action') == 'upload':
 			title, themes, description, score, author = \
 				request.POST.get('title'), \
